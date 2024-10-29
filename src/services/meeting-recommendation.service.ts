@@ -68,7 +68,7 @@ export class MeetingRecommendationService {
     const hasClashMentee = currentMenteeAvailability.some(
       (event) =>
         recommendation >= event.startDateTime &&
-        recommendation <= event.endDateTime,
+        recommendation < event.endDateTime,
     );
     if (hasClashMentee) return false;
 
@@ -77,7 +77,7 @@ export class MeetingRecommendationService {
     const hasClashMentor = currentMentorAvailability.some(
       (event) =>
         recommendation >= event.startDateTime &&
-        recommendation <= event.endDateTime,
+        recommendation < event.endDateTime,
     );
     if (hasClashMentor) return false;
 
