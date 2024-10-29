@@ -1,5 +1,4 @@
 import { Controller, Get, Put, Query } from '@nestjs/common';
-import { mockMenteeId, mockMentorId } from 'src/hacked-database';
 import { MeetingRecommendationService } from '../services/meeting-recommendation.service';
 
 @Controller('api/meetings')
@@ -8,15 +7,16 @@ export class MeetingController {
     private readonly meetingRecommendationService: MeetingRecommendationService,
   ) {}
 
-  @Get('recommendations')
-  async getRecommendations() {
-    const mentorId = mockMentorId;
-    const menteeId = mockMenteeId;
-    return this.meetingRecommendationService.recommendMeeting(
-      mentorId,
-      menteeId,
-    );
-  }
+  // For testing the recommendation logic
+  // @Get('recommendations')
+  // async getRecommendations() {
+  //   const mentorId = mockMentorId;
+  //   const menteeId = mockMenteeId;
+  //   return this.meetingRecommendationService.recommendMeeting(
+  //     mentorId,
+  //     menteeId,
+  //   );
+  // }
 
   @Put('confirm')
   async confirmAppointment(
