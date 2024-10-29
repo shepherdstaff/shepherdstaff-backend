@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { mockMentorId } from 'src/hacked-database';
-import { MeetingStatus } from '../entities/meeting.entity';
+import { Controller, Get, Put, Query } from '@nestjs/common';
+import { mockMenteeId, mockMentorId } from 'src/hacked-database';
 import { MeetingRecommendationService } from '../services/meeting-recommendation.service';
 
 @Controller('api/meetings')
@@ -11,17 +10,40 @@ export class MeetingController {
 
   @Get('recommendations')
   async getRecommendations() {
-    // TODO: Get actual mentor ID from authentication
     const mentorId = mockMentorId;
-    return this.meetingRecommendationService.recommendMeetings(mentorId);
+    const menteeId = mockMenteeId;
+    return this.meetingRecommendationService.recommendMeeting(
+      mentorId,
+      menteeId,
+    );
   }
 
-  @Patch(':id')
-  async updateMeetingStatus(
-    @Param('id') id: string,
-    @Body() { status }: { status: MeetingStatus },
+  @Put('confirm')
+  async confirmAppointment(
+    @Query('mentorId') mentorId: string,
+    @Query('menteeId') menteeId: string,
   ) {
-    // TODO: Implement status update logic
-    return { id, status };
+    return this.meetingRecommendationService.confirmMeeting(mentorId, menteeId);
+  }
+
+  @Put('reject')
+  async rejectAppointment(
+    @Query('mentorId') mentorId: string,
+    @Query('menteeId') menteeId: string,
+  ) {
+    return this.meetingRecommendationService.rejectMeeting(mentorId, menteeId);
+  }
+
+  @Put('cancel')
+  async cancelAppointment(
+    @Query('mentorId') mentorId: string,
+    @Query('menteeId') menteeId: string,
+  ) {
+    return this.meetingRecommendationService.cancelMeeting(mentorId, menteeId);
+  }
+
+  @Get()
+  async getAppointments(@Query('mentorId') mentorId: string) {
+    return this.meetingRecommendationService.getAppointments(mentorId);
   }
 }

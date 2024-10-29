@@ -1,3 +1,4 @@
+import { Appointment } from './interfaces/appointments';
 import { CalendarEvent } from './interfaces/availability';
 
 export const mockMenteeId = 'mentee-1';
@@ -128,4 +129,16 @@ export const menteeAvailability: { [menteeId: string]: CalendarEvent[] } = {
         new Date(event.endDateTime),
       ),
   ),
+};
+
+export const appointments: {
+  [mentorId: string]: {
+    [menteeId: string]: Appointment;
+  };
+} = {
+  [mockMentorId]: {},
+};
+
+export const mentorToMenteeMap: { [mentorId: string]: string[] } = {
+  [mockMentorId]: [mockMenteeId],
 };

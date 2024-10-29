@@ -1,106 +1,177 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { menteeAvailability } from 'src/hacked-database';
-import { RecommendedAvailabilities } from 'src/interfaces/availability';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import {
+  appointments,
+  menteeAvailability,
+  mentorAvailability,
+  mentorToMenteeMap,
+} from 'src/hacked-database';
+import { AppointmentStatus } from 'src/interfaces/appointments';
+import {
+  CalendarEvent,
+  RecommendedAvailabilities,
+} from 'src/interfaces/availability';
 import { AIService } from './ai.service';
 
 @Injectable()
 export class MeetingRecommendationService {
   constructor(@Inject(AIService) private aiService: AIService) {}
 
-  async recommendMeetings(
+  async recommendMeeting(
     mentorId: string,
+    menteeId: string,
   ): Promise<RecommendedAvailabilities> {
     const recommendations: RecommendedAvailabilities = {};
 
-    for (const menteeId in menteeAvailability) {
-      // const lastMeeting = await this.getLastMeeting(mentee.id);
-      // const nextMeetingDate = this.calculateNextMeetingDate(
-      //   lastMeeting,
-      //   mentee.meetingFrequencyDays,
-      // );
-      // if (nextMeetingDate) {
-      //   const availableSlot = await this.findAvailableSlot(
-      //     mentee,
-      //     nextMeetingDate,
-      //   );
-      //   if (availableSlot) {
-      //     const meeting = this.meetingRepository.create({
-      //       dateTime: availableSlot,
-      //       status: MeetingStatus.RECOMMENDED,
-      //       mentee,
-      //     });
-      //     recommendations.push(meeting);
-      //   }
-      // }
-      const recommendation = await this.aiService.generateRecommendedDate(
+    let recommendation = await this.aiService.generateRecommendedDate(
+      mentorId,
+      menteeId,
+    );
+
+    const isValidRecommendation = this.verifyRecommendation(
+      mentorId,
+      menteeId,
+      recommendation,
+    );
+    if (!isValidRecommendation) {
+      Logger.warn(
+        `Invalid recommendation ${recommendation.toISOString()}, trying again`,
+        'MeetingRecommendationService',
+      );
+      // Try again once - we are on a budget so we limit to one retry
+      recommendation = await this.aiService.generateRecommendedDate(
         mentorId,
         menteeId,
       );
-      recommendations[menteeId] = recommendation;
     }
+
+    recommendations[menteeId] = recommendation;
+    appointments[mentorId][menteeId] = {
+      id: Date.now().toString(),
+      status: AppointmentStatus.PENDING,
+      menteeId,
+      mentorId,
+      startDateTime: recommendation,
+      endDateTime: new Date(recommendation.getTime() + 120 * 60 * 1000), // 2 hours
+    };
 
     return recommendations;
   }
 
-  // private async getLastMeeting(menteeId: string): Promise<Meeting | null> {
-  //   return await this.meetingRepository.findOne({
-  //     where: {
-  //       mentee: { id: menteeId },
-  //       status: MeetingStatus.MET,
-  //     },
-  //     order: { dateTime: 'DESC' },
-  //   });
-  // }
+  private verifyRecommendation(
+    mentorId: string,
+    menteeId: string,
+    recommendation: Date,
+  ): boolean {
+    // Check if the recommendation is within the mentee's availability
+    const currentMenteeAvailability = menteeAvailability[menteeId];
+    const hasClashMentee = currentMenteeAvailability.some(
+      (event) =>
+        recommendation >= event.startDateTime &&
+        recommendation <= event.endDateTime,
+    );
+    if (hasClashMentee) return false;
 
-  // private calculateNextMeetingDate(
-  //   lastMeeting: Meeting | null,
-  //   frequencyDays: number,
-  // ): Date {
-  //   const baseDate = lastMeeting ? lastMeeting.dateTime : new Date();
-  //   return addDays(baseDate, frequencyDays);
-  // }
+    // Check if the recommendation is within the mentor's availability
+    const currentMentorAvailability = mentorAvailability[mentorId];
+    const hasClashMentor = currentMentorAvailability.some(
+      (event) =>
+        recommendation >= event.startDateTime &&
+        recommendation <= event.endDateTime,
+    );
+    if (hasClashMentor) return false;
 
-  // private async findAvailableSlot(
-  //   mentee: Mentee,
-  //   targetDate: Date,
-  // ): Promise<Date | null> {
-  //   const dayOfWeek = format(targetDate, 'EEEE').toLowerCase();
-  //   const menteeSchedule = mentee.availability.weeklySchedule[dayOfWeek];
+    return true;
+  }
 
-  //   if (!menteeSchedule) return null;
+  confirmMeeting(mentorId: string, menteeId: string) {
+    const appointment = appointments[mentorId][menteeId];
+    appointment.status = AppointmentStatus.CONFIRMED;
 
-  //   // Check exceptions
-  //   const isException = mentee.availability.exceptions.find(
-  //     (ex) =>
-  //       format(parseISO(ex.date), 'yyyy-MM-dd') ===
-  //       format(targetDate, 'yyyy-MM-dd'),
-  //   );
-  //   if (isException && !isException.available) return null;
+    const appointmentCalendarEvent = new CalendarEvent(
+      false,
+      appointment.startDateTime,
+      appointment.endDateTime,
+      true,
+    );
 
-  //   // Find first available slot
-  //   for (const slot of menteeSchedule) {
-  //     const startTime = parseISO(
-  //       `${format(targetDate, 'yyyy-MM-dd')}T${slot.start}`,
-  //     );
-  //     const endTime = parseISO(
-  //       `${format(targetDate, 'yyyy-MM-dd')}T${slot.end}`,
-  //     );
+    mentorAvailability[mentorId].push(appointmentCalendarEvent);
 
-  //     const existingMeeting = await this.meetingRepository.findOne({
-  //       where: {
-  //         // dateTime: isWithinInterval(new Date(), {
-  //         //   start: startTime,
-  //         //   end: endTime,
-  //         // }),
-  //         dateTime: And(MoreThan(startTime), LessThan(endTime)),
-  //       },
-  //     });
+    menteeAvailability[menteeId].push(appointmentCalendarEvent);
+  }
 
-  //     if (!existingMeeting) {
-  //       return startTime;
-  //     }
-  //   }
+  rejectMeeting(mentorId: string, menteeId: string) {
+    const appointment = appointments[mentorId][menteeId];
+    appointment.status = AppointmentStatus.REJECTED;
 
-  //   return null;
-  // }
+    const appointmentCalendarEvent = new CalendarEvent(
+      false,
+      appointment.startDateTime,
+      appointment.endDateTime,
+      false,
+    );
+
+    menteeAvailability[menteeId].push(appointmentCalendarEvent);
+  }
+
+  cancelMeeting(mentorId: string, menteeId: string) {
+    const appointment = appointments[mentorId][menteeId];
+    appointment.status = AppointmentStatus.CANCELLED;
+
+    const appointmentCalendarEvent = new CalendarEvent(
+      false,
+      appointment.startDateTime,
+      appointment.endDateTime,
+      false,
+    );
+
+    menteeAvailability[menteeId].push(appointmentCalendarEvent);
+  }
+
+  completeMeeting(mentorId: string, menteeId: string) {
+    const appointment = appointments[mentorId][menteeId];
+    appointment.status = AppointmentStatus.COMPLETED;
+  }
+
+  private deleteMeeting(mentorId: string, menteeId: string) {
+    delete appointments[mentorId][menteeId];
+  }
+
+  async getAppointments(mentorId: string) {
+    return appointments[mentorId];
+  }
+
+  // NOTE: This method will constantly call ChatGPT, so please comment out if not testing the recommendation feature
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async checkAppointments() {
+    const now = new Date();
+    for (const mentorId in mentorToMenteeMap) {
+      for (const menteeId of mentorToMenteeMap[mentorId]) {
+        Logger.log(`Checking appointments - ${mentorId} - ${menteeId}`);
+        const appointment = appointments[mentorId][menteeId];
+        if (
+          !appointment ||
+          appointment.status === AppointmentStatus.REJECTED ||
+          appointment.status === AppointmentStatus.CANCELLED
+        ) {
+          Logger.log(`Recommending meeting - ${mentorId} - ${menteeId}`);
+          await this.recommendMeeting(mentorId, menteeId);
+        } else if (
+          appointment.status === AppointmentStatus.CONFIRMED &&
+          now > appointment.endDateTime
+        ) {
+          Logger.log(`Completing meeting - ${mentorId} - ${menteeId}`);
+          this.completeMeeting(mentorId, menteeId);
+        } else if (
+          appointment.status === AppointmentStatus.PENDING &&
+          now > appointment.startDateTime
+        ) {
+          Logger.log(
+            `Pending appointment lapsed, deleting appointment - ${mentorId} - ${menteeId}`,
+          );
+          this.deleteMeeting(mentorId, menteeId);
+        }
+      }
+    }
+  }
 }
