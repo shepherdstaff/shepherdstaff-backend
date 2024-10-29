@@ -1,4 +1,5 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { UserType } from 'src/interfaces/users';
 import { CalendarSyncService } from '../services/calendar-sync.service';
 
 @Controller('api/calendar')
@@ -7,12 +8,12 @@ export class CalendarController {
 
   @Post('sync')
   async syncCalendar(
-    @Body() body: { token: string; userType: 'mentor' | 'mentee'; userId: string }
+    @Body() body: { token: string; userType: UserType; userId: string },
   ) {
     return this.calendarSyncService.syncCalendar(
       body.token,
       body.userType,
-      body.userId
+      body.userId,
     );
   }
 }

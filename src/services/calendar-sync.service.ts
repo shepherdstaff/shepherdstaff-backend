@@ -1,24 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { google } from 'googleapis';
-import { Repository } from 'typeorm';
-import { Mentee } from '../entities/mentee.entity';
-import { Mentor } from '../entities/mentor.entity';
+import { menteeAvailability, mentorAvailability } from 'src/hacked-database';
+import { CalendarEvent } from 'src/interfaces/availability';
+import { UserType } from 'src/interfaces/users';
 
 @Injectable()
 export class CalendarSyncService {
-  constructor(
-    @InjectRepository(Mentor)
-    private mentorRepository: Repository<Mentor>,
-    @InjectRepository(Mentee)
-    private menteeRepository: Repository<Mentee>,
-  ) {}
+  constructor() {}
 
-  async syncCalendar(
-    token: string,
-    userType: 'mentor' | 'mentee',
-    userId: string,
-  ) {
+  async syncCalendar(token: string, userType: UserType, userId: string) {
     const calendar = google.calendar({ version: 'v3', auth: token });
 
     // Get events for the next month
@@ -31,42 +21,42 @@ export class CalendarSyncService {
     });
 
     const events = response.data.items;
-    const availability = this.processEvents(events);
-
-    if (userType === 'mentor') {
-      await this.mentorRepository.update(userId, { availability });
-    } else {
-      await this.menteeRepository.update(userId, { availability });
-    }
+    const availability = this.processEvents(userId, userType, events);
 
     return availability;
   }
 
-  private processEvents(events: any[]) {
-    const weeklySchedule: { [key: string]: { start: string; end: string }[] } =
-      {
-        monday: [],
-        tuesday: [],
-        wednesday: [],
-        thursday: [],
-        friday: [],
-        saturday: [],
-        sunday: [],
-      };
-
+  private processEvents(userId: string, userType: UserType, events: any[]) {
     events.forEach((event) => {
       if (event.start?.dateTime && event.end?.dateTime) {
+        // not full day
         const start = new Date(event.start.dateTime);
         const end = new Date(event.end.dateTime);
-        const day = start.toLocaleDateString('en-US', { weekday: 'short' });
 
-        weeklySchedule[day].push({
-          start: start.toLocaleTimeString('en-US', { hour12: false }),
-          end: end.toLocaleTimeString('en-US', { hour12: false }),
-        });
+        const currentEvent: CalendarEvent = new CalendarEvent(
+          false,
+          start,
+          end,
+        );
+
+        if (userType === UserType.MENTOR) {
+          mentorAvailability[userId].push(currentEvent);
+        } else if (userType === UserType.MENTEE) {
+          menteeAvailability[userId].push(currentEvent);
+        }
+      } else if (event.start?.date) {
+        // full day
+        const start = new Date(event.start.date);
+        const end = new Date(event.end.date);
+
+        const currentEvent: CalendarEvent = new CalendarEvent(true, start, end);
+
+        if (userType === UserType.MENTOR) {
+          mentorAvailability[userId].push(currentEvent);
+        } else if (userType === UserType.MENTEE) {
+          menteeAvailability[userId].push(currentEvent);
+        }
       }
     });
-
-    return { weeklySchedule };
   }
 }

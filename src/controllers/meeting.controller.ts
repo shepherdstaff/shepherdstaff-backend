@@ -1,6 +1,7 @@
-import { Controller, Get, Patch, Param, Body } from '@nestjs/common';
-import { MeetingRecommendationService } from '../services/meeting-recommendation.service';
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { mockMentorId } from 'src/hacked-database';
 import { MeetingStatus } from '../entities/meeting.entity';
+import { MeetingRecommendationService } from '../services/meeting-recommendation.service';
 
 @Controller('api/meetings')
 export class MeetingController {
@@ -11,7 +12,7 @@ export class MeetingController {
   @Get('recommendations')
   async getRecommendations() {
     // TODO: Get actual mentor ID from authentication
-    const mentorId = 'current-mentor-id';
+    const mentorId = mockMentorId;
     return this.meetingRecommendationService.recommendMeetings(mentorId);
   }
 
