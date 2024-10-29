@@ -110,7 +110,7 @@ const mockEventsMentee = [
   },
 ];
 
-export const mentorAvailability: { [mentorId: string]: CalendarEvent[] } = {
+export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
   [mockMentorId]: mockEventsMentor.map(
     (event) =>
       new CalendarEvent(
@@ -120,7 +120,7 @@ export const mentorAvailability: { [mentorId: string]: CalendarEvent[] } = {
       ),
   ),
 };
-export const menteeAvailability: { [menteeId: string]: CalendarEvent[] } = {
+export const menteeAvailabilityDb: { [menteeId: string]: CalendarEvent[] } = {
   [mockMenteeId]: mockEventsMentee.map(
     (event) =>
       new CalendarEvent(
@@ -131,7 +131,7 @@ export const menteeAvailability: { [menteeId: string]: CalendarEvent[] } = {
   ),
 };
 
-export const appointments: {
+export const appointmentsDb: {
   [mentorId: string]: {
     [menteeId: string]: Appointment;
   };
@@ -139,6 +139,6 @@ export const appointments: {
   [mockMentorId]: {},
 };
 
-export const mentorToMenteeMap: { [mentorId: string]: string[] } = {
+export const mentorToMenteeMapDb: { [mentorId: string]: string[] } = {
   [mockMentorId]: [mockMenteeId],
 };

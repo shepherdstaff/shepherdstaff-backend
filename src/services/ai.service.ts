@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { menteeAvailability, mentorAvailability } from 'src/hacked-database';
+import {
+  menteeAvailabilityDb,
+  mentorAvailabilityDb,
+} from 'src/hacked-database';
 
 const RECOMMENDED_DATE_RESULT_PREFIX = '==RESULT==';
 @Injectable()
@@ -15,8 +18,8 @@ export class AIService {
   }
 
   async generateRecommendedDate(mentorId: string, menteeId: string) {
-    const mentorEvents = mentorAvailability[mentorId];
-    const menteeEvents = menteeAvailability[menteeId];
+    const mentorEvents = mentorAvailabilityDb[mentorId];
+    const menteeEvents = menteeAvailabilityDb[menteeId];
 
     const prompt = `You are an appointment scheduler that recommends dates and timings for a mentor and mentee based on their availabilities. 
       All persons have an array of events representing the events that they already have scheduled. These is the array for the mentor: \n

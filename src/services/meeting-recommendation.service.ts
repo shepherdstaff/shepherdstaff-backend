@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
-  appointments,
-  menteeAvailability,
-  mentorAvailability,
-  mentorToMenteeMap,
+  appointmentsDb,
+  menteeAvailabilityDb,
+  mentorAvailabilityDb,
+  mentorToMenteeMapDb,
 } from 'src/hacked-database';
 import { AppointmentStatus } from 'src/interfaces/appointments';
 import {
@@ -46,7 +46,7 @@ export class MeetingRecommendationService {
     }
 
     recommendations[menteeId] = recommendation;
-    appointments[mentorId][menteeId] = {
+    appointmentsDb[mentorId][menteeId] = {
       id: Date.now().toString(),
       status: AppointmentStatus.PENDING,
       menteeId,
@@ -64,7 +64,7 @@ export class MeetingRecommendationService {
     recommendation: Date,
   ): boolean {
     // Check if the recommendation is within the mentee's availability
-    const currentMenteeAvailability = menteeAvailability[menteeId];
+    const currentMenteeAvailability = menteeAvailabilityDb[menteeId];
     const hasClashMentee = currentMenteeAvailability.some(
       (event) =>
         recommendation >= event.startDateTime &&
@@ -73,7 +73,7 @@ export class MeetingRecommendationService {
     if (hasClashMentee) return false;
 
     // Check if the recommendation is within the mentor's availability
-    const currentMentorAvailability = mentorAvailability[mentorId];
+    const currentMentorAvailability = mentorAvailabilityDb[mentorId];
     const hasClashMentor = currentMentorAvailability.some(
       (event) =>
         recommendation >= event.startDateTime &&
@@ -85,7 +85,7 @@ export class MeetingRecommendationService {
   }
 
   confirmMeeting(mentorId: string, menteeId: string) {
-    const appointment = appointments[mentorId][menteeId];
+    const appointment = appointmentsDb[mentorId][menteeId];
     appointment.status = AppointmentStatus.CONFIRMED;
 
     const appointmentCalendarEvent = new CalendarEvent(
@@ -95,13 +95,13 @@ export class MeetingRecommendationService {
       true,
     );
 
-    mentorAvailability[mentorId].push(appointmentCalendarEvent);
+    mentorAvailabilityDb[mentorId].push(appointmentCalendarEvent);
 
-    menteeAvailability[menteeId].push(appointmentCalendarEvent);
+    menteeAvailabilityDb[menteeId].push(appointmentCalendarEvent);
   }
 
   rejectMeeting(mentorId: string, menteeId: string) {
-    const appointment = appointments[mentorId][menteeId];
+    const appointment = appointmentsDb[mentorId][menteeId];
     appointment.status = AppointmentStatus.REJECTED;
 
     const appointmentCalendarEvent = new CalendarEvent(
@@ -111,11 +111,11 @@ export class MeetingRecommendationService {
       false,
     );
 
-    menteeAvailability[menteeId].push(appointmentCalendarEvent);
+    menteeAvailabilityDb[menteeId].push(appointmentCalendarEvent);
   }
 
   cancelMeeting(mentorId: string, menteeId: string) {
-    const appointment = appointments[mentorId][menteeId];
+    const appointment = appointmentsDb[mentorId][menteeId];
     appointment.status = AppointmentStatus.CANCELLED;
 
     const appointmentCalendarEvent = new CalendarEvent(
@@ -125,30 +125,30 @@ export class MeetingRecommendationService {
       false,
     );
 
-    menteeAvailability[menteeId].push(appointmentCalendarEvent);
+    menteeAvailabilityDb[menteeId].push(appointmentCalendarEvent);
   }
 
   completeMeeting(mentorId: string, menteeId: string) {
-    const appointment = appointments[mentorId][menteeId];
+    const appointment = appointmentsDb[mentorId][menteeId];
     appointment.status = AppointmentStatus.COMPLETED;
   }
 
   private deleteMeeting(mentorId: string, menteeId: string) {
-    delete appointments[mentorId][menteeId];
+    delete appointmentsDb[mentorId][menteeId];
   }
 
   async getAppointments(mentorId: string) {
-    return appointments[mentorId];
+    return appointmentsDb[mentorId];
   }
 
   // NOTE: This method will constantly call ChatGPT, so please comment out if not testing the recommendation feature
   @Cron(CronExpression.EVERY_30_SECONDS)
   async checkAppointments() {
     const now = new Date();
-    for (const mentorId in mentorToMenteeMap) {
-      for (const menteeId of mentorToMenteeMap[mentorId]) {
+    for (const mentorId in mentorToMenteeMapDb) {
+      for (const menteeId of mentorToMenteeMapDb[mentorId]) {
         Logger.log(`Checking appointments - ${mentorId} - ${menteeId}`);
-        const appointment = appointments[mentorId][menteeId];
+        const appointment = appointmentsDb[mentorId][menteeId];
         if (
           !appointment ||
           appointment.status === AppointmentStatus.REJECTED ||
