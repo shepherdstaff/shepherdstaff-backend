@@ -8,7 +8,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2024-10-30T00:00:00.000Z',
-    endDateTime: '2024-10-30T00:00:00.000Z',
+    endDateTime: '2024-10-30T23:59:59.000Z',
   },
   {
     isFullDay: false,
@@ -33,7 +33,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2025-02-01T00:00:00.000Z',
-    endDateTime: '2025-02-01T00:00:00.000Z',
+    endDateTime: '2025-02-01T23:59:59.000Z',
   },
   {
     isFullDay: false,
@@ -53,7 +53,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2025-06-14T00:00:00.000Z',
-    endDateTime: '2025-06-14T00:00:00.000Z',
+    endDateTime: '2025-06-14T23:59:59.000Z',
   },
 ];
 
