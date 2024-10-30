@@ -86,12 +86,12 @@ export class MeetingRecommendationService {
     return true;
   }
 
-  private findCalendarEventInMentorAvailabilities(
+  private findCalendarEventIndexInMentorAvailabilities(
     mentorId: string,
     meetingStatus: AppointmentStatus,
     startDateTime: Date,
   ) {
-    return mentorAvailabilityDb[mentorId].find(
+    return mentorAvailabilityDb[mentorId].findIndex(
       (event) =>
         event.appointmentStatus === meetingStatus &&
         event.startDateTime === startDateTime,
@@ -110,48 +110,19 @@ export class MeetingRecommendationService {
     );
   }
 
-  confirmMeeting(mentorId: string, menteeId: string) {
-    const appointment = appointmentsDb[mentorId][menteeId];
-    appointment.status = AppointmentStatus.CONFIRMED;
-
-    // Update calendar event statuses
-
-    const mentorCalendarEvent = this.findCalendarEventInMentorAvailabilities(
-      mentorId,
-      AppointmentStatus.PENDING,
-      appointment.startDateTime,
-    );
-    mentorCalendarEvent.appointmentStatus = AppointmentStatus.CONFIRMED;
-
-    const menteeCalendarEvent = this.findCalendarEventInMenteeAvailabilities(
-      menteeId,
-      AppointmentStatus.PENDING,
-      appointment.startDateTime,
-    );
-
-    menteeCalendarEvent.appointmentStatus = AppointmentStatus.CONFIRMED;
-  }
-
   rejectMeeting(mentorId: string, menteeId: string) {
     const appointment = appointmentsDb[mentorId][menteeId];
     appointment.status = AppointmentStatus.REJECTED;
 
     // Update calendar event statuses
+    const mentorCalendarEventIndex =
+      this.findCalendarEventIndexInMentorAvailabilities(
+        mentorId,
+        AppointmentStatus.PENDING,
+        appointment.startDateTime,
+      );
+    mentorAvailabilityDb[mentorId].splice(mentorCalendarEventIndex, 1);
 
-    const menteeCalendarEvent = this.findCalendarEventInMenteeAvailabilities(
-      menteeId,
-      AppointmentStatus.PENDING,
-      appointment.startDateTime,
-    );
-
-    menteeCalendarEvent.appointmentStatus = null;
-  }
-
-  cancelMeeting(mentorId: string, menteeId: string) {
-    const appointment = appointmentsDb[mentorId][menteeId];
-    appointment.status = AppointmentStatus.CANCELLED;
-
-    // Update calendar event statuses
     const menteeCalendarEvent = this.findCalendarEventInMenteeAvailabilities(
       menteeId,
       AppointmentStatus.PENDING,
@@ -166,10 +137,6 @@ export class MeetingRecommendationService {
     appointment.status = AppointmentStatus.COMPLETED;
   }
 
-  private deleteMeeting(mentorId: string, menteeId: string) {
-    delete appointmentsDb[mentorId][menteeId];
-  }
-
   async getAppointments(mentorId: string) {
     return appointmentsDb[mentorId];
   }
@@ -182,27 +149,15 @@ export class MeetingRecommendationService {
       for (const menteeId of mentorToMenteeMapDb[mentorId]) {
         Logger.log(`Checking appointments - ${mentorId} - ${menteeId}`);
         const appointment = appointmentsDb[mentorId][menteeId];
-        if (
-          !appointment ||
-          appointment.status === AppointmentStatus.REJECTED ||
-          appointment.status === AppointmentStatus.CANCELLED
-        ) {
+        if (!appointment || appointment.status === AppointmentStatus.REJECTED) {
           Logger.log(`Recommending meeting - ${mentorId} - ${menteeId}`);
           await this.recommendMeeting(mentorId, menteeId);
         } else if (
-          appointment.status === AppointmentStatus.CONFIRMED &&
+          appointment.status === AppointmentStatus.PENDING &&
           now > appointment.endDateTime
         ) {
           Logger.log(`Completing meeting - ${mentorId} - ${menteeId}`);
           this.completeMeeting(mentorId, menteeId);
-        } else if (
-          appointment.status === AppointmentStatus.PENDING &&
-          now > appointment.startDateTime
-        ) {
-          Logger.log(
-            `Pending appointment lapsed, deleting appointment - ${mentorId} - ${menteeId}`,
-          );
-          this.deleteMeeting(mentorId, menteeId);
         }
       }
     }

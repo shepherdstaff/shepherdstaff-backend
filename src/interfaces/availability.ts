@@ -5,13 +5,13 @@ export class CalendarEvent {
   startDateTime: Date;
   endDateTime: Date;
   isAppointment: boolean;
-  appointmentStatus: AppointmentStatus.CONFIRMED | AppointmentStatus.PENDING;
+  appointmentStatus: AppointmentStatus.PENDING | null;
 
   constructor(
     isFullDay: boolean,
     startDateTime: Date,
     endDateTime: Date,
-    appointmentStatus?: AppointmentStatus.CONFIRMED | AppointmentStatus.PENDING,
+    appointmentStatus?: AppointmentStatus.PENDING | null,
   ) {
     this.isFullDay = isFullDay;
     this.startDateTime = startDateTime;
