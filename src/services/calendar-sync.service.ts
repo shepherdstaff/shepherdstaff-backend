@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { google } from 'googleapis';
-import { menteeAvailability, mentorAvailability } from 'src/hacked-database';
+import {
+  menteeAvailabilityDb,
+  mentorAvailabilityDb,
+} from 'src/hacked-database';
 import { CalendarEvent } from 'src/interfaces/availability';
 import { UserType } from 'src/interfaces/users';
 
@@ -40,9 +43,9 @@ export class CalendarSyncService {
         );
 
         if (userType === UserType.MENTOR) {
-          mentorAvailability[userId].push(currentEvent);
+          mentorAvailabilityDb[userId].push(currentEvent);
         } else if (userType === UserType.MENTEE) {
-          menteeAvailability[userId].push(currentEvent);
+          menteeAvailabilityDb[userId].push(currentEvent);
         }
       } else if (event.start?.date) {
         // full day
@@ -52,9 +55,9 @@ export class CalendarSyncService {
         const currentEvent: CalendarEvent = new CalendarEvent(true, start, end);
 
         if (userType === UserType.MENTOR) {
-          mentorAvailability[userId].push(currentEvent);
+          mentorAvailabilityDb[userId].push(currentEvent);
         } else if (userType === UserType.MENTEE) {
-          menteeAvailability[userId].push(currentEvent);
+          menteeAvailabilityDb[userId].push(currentEvent);
         }
       }
     });

@@ -18,28 +18,12 @@ export class MeetingController {
   //   );
   // }
 
-  @Put('confirm')
-  async confirmAppointment(
-    @Query('mentorId') mentorId: string,
-    @Query('menteeId') menteeId: string,
-  ) {
-    return this.meetingRecommendationService.confirmMeeting(mentorId, menteeId);
-  }
-
   @Put('reject')
   async rejectAppointment(
     @Query('mentorId') mentorId: string,
     @Query('menteeId') menteeId: string,
   ) {
     return this.meetingRecommendationService.rejectMeeting(mentorId, menteeId);
-  }
-
-  @Put('cancel')
-  async cancelAppointment(
-    @Query('mentorId') mentorId: string,
-    @Query('menteeId') menteeId: string,
-  ) {
-    return this.meetingRecommendationService.cancelMeeting(mentorId, menteeId);
   }
 
   @Get()

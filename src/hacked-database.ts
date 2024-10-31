@@ -11,7 +11,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2024-10-30T00:00:00.000Z',
-    endDateTime: '2024-10-30T00:00:00.000Z',
+    endDateTime: '2024-10-30T23:59:59.000Z',
   },
   {
     isFullDay: false,
@@ -36,7 +36,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2025-02-01T00:00:00.000Z',
-    endDateTime: '2025-02-01T00:00:00.000Z',
+    endDateTime: '2025-02-01T23:59:59.000Z',
   },
   {
     isFullDay: false,
@@ -56,7 +56,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2025-06-14T00:00:00.000Z',
-    endDateTime: '2025-06-14T00:00:00.000Z',
+    endDateTime: '2025-06-14T23:59:59.000Z',
   },
 ];
 
@@ -113,6 +113,7 @@ const mockEventsMentee = [
   },
 ];
 
+
 const mockPrayers = [
   {
     content: 'A very long and detailed prayer request.',
@@ -140,7 +141,8 @@ export const prayerDb: {
   }
 };
 
-export const mentorAvailability: { [mentorId: string]: CalendarEvent[] } = {
+export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
+
   [mockMentorId]: mockEventsMentor.map(
     (event) =>
       new CalendarEvent(
@@ -150,7 +152,7 @@ export const mentorAvailability: { [mentorId: string]: CalendarEvent[] } = {
       ),
   ),
 };
-export const menteeAvailability: { [menteeId: string]: CalendarEvent[] } = {
+export const menteeAvailabilityDb: { [menteeId: string]: CalendarEvent[] } = {
   [mockMenteeId]: mockEventsMentee.map(
     (event) =>
       new CalendarEvent(
@@ -161,7 +163,7 @@ export const menteeAvailability: { [menteeId: string]: CalendarEvent[] } = {
   ),
 };
 
-export const appointments: {
+export const appointmentsDb: {
   [mentorId: string]: {
     [menteeId: string]: Appointment;
   };
@@ -169,6 +171,6 @@ export const appointments: {
   [mockMentorId]: {},
 };
 
-export const mentorToMenteeMap: { [mentorId: string]: string[] } = {
+export const mentorToMenteeMapDb: { [mentorId: string]: string[] } = {
   [mockMentorId]: [mockMenteeId],
 };
