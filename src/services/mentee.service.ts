@@ -21,6 +21,23 @@ export class MenteeService {
     Logger.log(`Added new mentee - ${mentorId} - ${menteeId}`);
   }
 
+  deleteMentee(mentorId: string, menteeId: string) {
+      // Check if mentee already exists
+      if (mentorToMenteeMapDb[mentorId] == null) {
+        Logger.warn('MentorId not found, add a mentor first.');
+      }
+      if (mentorToMenteeMapDb[mentorId].includes(menteeId)) {
+        Logger.warn(' Mentee already exist for this Mentor.');
+      }
+
+      const menteeList = mentorToMenteeMapDb[mentorId];
+      const menteeIndex = menteeList.findIndex(id => id === menteeId);
+      if (menteeIndex !== -1) {
+        menteeList.splice(menteeIndex, 1);
+      }
+      Logger.log(`Deleted mentee - ${mentorId} - ${menteeId}`);
+    }
+
 
 //   // Create a new appointment
 //   createAppointment(menteeId: string, mentorId: string, startDateTime: Date, endDateTime: Date): Appointment {
