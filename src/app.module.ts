@@ -9,7 +9,8 @@ import { AIService } from './services/ai.service';
 import { CalendarSyncService } from './services/calendar-sync.service';
 import { MeetingRecommendationService } from './services/meeting-recommendation.service';
 import { MenteeService } from './services/mentee.service'; // Import MenteeService
-
+import { NoteService } from './services/note.service';
+import { NoteController } from './controllers/note.controller';
 
 @Module({
   imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
@@ -17,15 +18,15 @@ import { MenteeService } from './services/mentee.service'; // Import MenteeServi
     CalendarController,
     ChatController,
     MeetingController,
-    MenteeController
-    // NoteController,
+    MenteeController,
+    NoteController
   ],
   providers: [
     AIService,
     CalendarSyncService,
     MeetingRecommendationService,
     MenteeService,
-    // NoteService,
+    NoteService
   ],
 })
 export class AppModule {}

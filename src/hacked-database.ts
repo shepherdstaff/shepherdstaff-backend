@@ -1,5 +1,8 @@
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Appointment } from './interfaces/appointments';
 import { CalendarEvent } from './interfaces/availability';
+import { Prayer } from './interfaces/notes';
+import { randomUUID } from 'crypto';
 
 export const mockMenteeId = 'mentee-1';
 export const mockMentorId = 'mentor-1';
@@ -8,7 +11,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2024-10-30T00:00:00.000Z',
-    endDateTime: '2024-10-30T00:00:00.000Z',
+    endDateTime: '2024-10-30T23:59:59.000Z',
   },
   {
     isFullDay: false,
@@ -33,7 +36,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2025-02-01T00:00:00.000Z',
-    endDateTime: '2025-02-01T00:00:00.000Z',
+    endDateTime: '2025-02-01T23:59:59.000Z',
   },
   {
     isFullDay: false,
@@ -53,7 +56,7 @@ const mockEventsMentor = [
   {
     isFullDay: true,
     startDateTime: '2025-06-14T00:00:00.000Z',
-    endDateTime: '2025-06-14T00:00:00.000Z',
+    endDateTime: '2025-06-14T23:59:59.000Z',
   },
 ];
 
@@ -110,7 +113,36 @@ const mockEventsMentee = [
   },
 ];
 
+
+const mockPrayers = [
+  {
+    content: 'A very long and detailed prayer request.',
+    date: '2025-04-14T00:00:00.000Z'
+  },
+  {
+    content: 'A very long and detailed prayer request.',
+    date: '2025-07-12T00:00:00.000Z'
+  }
+];
+
+export const prayerDb: {
+  [mentorId: string]: {
+    [menteeId: string]: Prayer[]
+  }
+} = {
+  [mockMentorId]: {
+    [mockMenteeId]: mockPrayers.map(
+      (prayer) =>
+      new Prayer(
+        prayer.content,
+        new Date(prayer.date)
+      )
+    )
+  }
+};
+
 export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
+
   [mockMentorId]: mockEventsMentor.map(
     (event) =>
       new CalendarEvent(
