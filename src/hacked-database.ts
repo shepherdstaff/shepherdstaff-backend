@@ -1,6 +1,11 @@
 import { Appointment } from './interfaces/appointments';
 import { CalendarEvent } from './interfaces/availability';
 import { Prayer } from './interfaces/notes';
+import {
+  mockPrayerRequest1,
+  mockPrayerRequest2,
+  mockPrayerRequest3,
+} from './mock-prayer-requests';
 
 export const mockMentee1Id = 'mentee-1';
 export const mockMentee2Id = 'mentee-2';
@@ -233,12 +238,24 @@ const mockEventsMentee5 = [
 
 const mockPrayers = [
   {
-    content: 'A very long and detailed prayer request.',
-    date: '2025-04-14T00:00:00.000Z',
+    content: mockPrayerRequest1,
+    date: '2024-04-14T00:00:00.000Z',
+  },
+  {
+    content: mockPrayerRequest2,
+    date: '2024-07-12T00:00:00.000Z',
+  },
+  {
+    content: mockPrayerRequest3,
+    date: '2024-06-11T00:00:00.000Z',
   },
   {
     content: 'A very long and detailed prayer request.',
-    date: '2025-07-12T00:00:00.000Z',
+    date: '2024-07-13T00:00:00.000Z',
+  },
+  {
+    content: 'A very long and detailed prayer request.',
+    date: '2024-08-10T00:00:00.000Z',
   },
 ];
 
@@ -248,9 +265,21 @@ export const prayerDb: {
   };
 } = {
   [mockMentorId]: {
-    [mockMentee1Id]: mockPrayers.map(
-      (prayer) => new Prayer(prayer.content, new Date(prayer.date)),
-    ),
+    [mockMentee1Id]: [
+      new Prayer(mockPrayers[0].content, new Date(mockPrayers[0].date)),
+    ],
+    [mockMentee2Id]: [
+      new Prayer(mockPrayers[1].content, new Date(mockPrayers[1].date)),
+    ],
+    [mockMentee3Id]: [
+      new Prayer(mockPrayers[2].content, new Date(mockPrayers[2].date)),
+    ],
+    [mockMentee4Id]: [
+      new Prayer(mockPrayers[3].content, new Date(mockPrayers[3].date)),
+    ],
+    [mockMentee5Id]: [
+      new Prayer(mockPrayers[4].content, new Date(mockPrayers[4].date)),
+    ],
   },
 };
 

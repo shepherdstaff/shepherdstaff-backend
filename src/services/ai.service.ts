@@ -1,17 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import {
   menteeAvailabilityDb,
+  menteeDb,
   mentorAvailabilityDb,
 } from 'src/hacked-database';
+import { NoteService } from './note.service';
 
 const RECOMMENDED_DATE_RESULT_PREFIX = '==RESULT==';
 @Injectable()
 export class AIService {
   private openai: OpenAI;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @Inject(NoteService) private noteService: NoteService,
+  ) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
     });
@@ -49,13 +54,11 @@ export class AIService {
   async generateChatbotResponse(
     message: string,
     context?: {
-      menteeId?: string;
-      menteeName?: string;
-      recentNotes?: string[];
-      recentPrayerRequests?: string[];
+      mentorId: string;
+      menteeId: string;
     },
   ) {
-    const systemPrompt = this.buildSystemPrompt(context);
+    const systemPrompt = await this.buildSystemPrompt(context);
 
     const response = await this.openai.chat.completions.create({
       model: 'gpt-4',
@@ -70,12 +73,10 @@ export class AIService {
     return response.choices[0].message.content;
   }
 
-  private buildSystemPrompt(context?: {
-    menteeId?: string;
-    menteeName?: string;
-    recentNotes?: string[];
-    recentPrayerRequests?: string[];
-  }): string {
+  private async buildSystemPrompt(context?: {
+    mentorId: string;
+    menteeId: string;
+  }): Promise<string> {
     let prompt = `You are a Christian mentoring assistant, trained to provide biblical guidance and counseling advice. 
     Your responses should:
     - Be grounded in biblical principles
@@ -84,16 +85,17 @@ export class AIService {
     - Provide practical, actionable advice
     - Maintain confidentiality and ethical boundaries`;
 
-    if (context?.menteeName) {
-      prompt += `\n\nYou are currently helping with mentoring ${context.menteeName}.`;
+    if (context) {
+      const { menteeId, mentorId } = context;
+      const menteeName = menteeDb[menteeId][0];
+      const prayerRequests = await this.noteService.getNotes(
+        mentorId,
+        menteeId,
+      );
 
-      if (context.recentNotes?.length) {
-        prompt += `\n\nRecent notes about ${context.menteeName}:\n${context.recentNotes.join('\n')}`;
-      }
+      prompt += `\n\nYou are currently helping with mentoring ${menteeName}.`;
 
-      if (context.recentPrayerRequests?.length) {
-        prompt += `\n\nRecent prayer requests from ${context.menteeName}:\n${context.recentPrayerRequests.join('\n')}`;
-      }
+      prompt += `\n\nRecent prayer requests from ${menteeName}:\n${prayerRequests.map((prayer) => prayer.toString()).join('\n')}`;
     }
 
     return prompt;
