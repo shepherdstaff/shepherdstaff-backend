@@ -22,21 +22,34 @@ export class MenteeService {
   }
 
   deleteMentee(mentorId: string, menteeId: string) {
-      // Check if mentee already exists
-      if (mentorToMenteeMapDb[mentorId] == null) {
-        Logger.warn('MentorId not found, add a mentor first.');
-      }
-      if (mentorToMenteeMapDb[mentorId].includes(menteeId)) {
-        Logger.warn(' Mentee already exist for this Mentor.');
-      }
-
-      const menteeList = mentorToMenteeMapDb[mentorId];
-      const menteeIndex = menteeList.findIndex(id => id === menteeId);
-      if (menteeIndex !== -1) {
-        menteeList.splice(menteeIndex, 1);
-      }
-      Logger.log(`Deleted mentee - ${mentorId} - ${menteeId}`);
+    // Check if mentee already exists
+    if (mentorToMenteeMapDb[mentorId] == null) {
+      Logger.warn('MentorId not found, add a mentor first.');
     }
+
+    const menteeList = mentorToMenteeMapDb[mentorId];
+    const menteeIndex = menteeList.findIndex(id => id === menteeId);
+    if (menteeIndex !== -1) {
+      menteeList.splice(menteeIndex, 1);
+    }
+    Logger.log(`Deleted mentee - ${mentorId} - ${menteeId}`);
+  }
+
+  getAllMentees(mentorId: string) {
+    // Check if mentee already exists
+    if (mentorToMenteeMapDb[mentorId] == null) {
+      Logger.warn('MentorId not found, add a mentor first.');
+    }
+
+    const menteeList = mentorToMenteeMapDb[mentorId];
+    if (menteeList) {
+      Logger.log(`Found ${menteeList.length} mentees for mentor ${mentorId}`);
+      return { mentorId, mentees: menteeList }; // Return mentorId and mentees in JSON format
+    } else {
+      Logger.warn(`No mentees found for mentor ${mentorId}`);
+      return { mentorId, mentees: [], message: `No mentees found for mentor ${mentorId}` }; // Empty array
+    }
+  }
 
 
 //   // Create a new appointment

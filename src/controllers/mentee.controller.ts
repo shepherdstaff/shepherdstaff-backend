@@ -33,6 +33,14 @@ export class MenteeController {
     return this.menteeService.deleteMentee(mentorId, menteeId);
   }
 
+  @Get('list/:mentorId')
+  listAllMentees(
+    @Param('mentorId') mentorId: string,
+  ) {
+    Logger.log('List All Mentees Controller Reached');
+    return this.menteeService.getAllMentees(mentorId);
+  }
+
 //   // Create an appointment
 //   @Post(':menteeId/appointments/:mentorId')
 //   createAppointment(
