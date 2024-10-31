@@ -7,6 +7,8 @@ import { MeetingController } from './controllers/meeting.controller';
 import { AIService } from './services/ai.service';
 import { CalendarSyncService } from './services/calendar-sync.service';
 import { MeetingRecommendationService } from './services/meeting-recommendation.service';
+import { NoteService } from './services/note.service';
+import { NoteController } from './controllers/note.controller';
 
 @Module({
   imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
@@ -14,13 +16,13 @@ import { MeetingRecommendationService } from './services/meeting-recommendation.
     CalendarController,
     ChatController,
     MeetingController,
-    // NoteController,
+    NoteController
   ],
   providers: [
     AIService,
     CalendarSyncService,
     MeetingRecommendationService,
-    // NoteService,
+    NoteService
   ],
 })
 export class AppModule {}
