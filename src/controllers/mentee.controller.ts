@@ -1,6 +1,7 @@
 // controllers/mentee.controller.ts
 import { Body, Controller, Delete, Get, Param, Post, Put, Logger } from '@nestjs/common';
 import { MenteeService } from '../services/mentee.service';
+import { NoteService } from 'src/services/note.service';
 import { Appointment } from '../interfaces/appointments';
 import { AppointmentStatus } from '../interfaces/appointments';
 import { CalendarEvent } from '../interfaces/availability';
@@ -8,7 +9,7 @@ import { CalendarEvent } from '../interfaces/availability';
 
 @Controller('mentee')
 export class MenteeController {
-  constructor(private readonly menteeService: MenteeService) {}
+  constructor(private readonly menteeService: MenteeService, private readonly noteService: NoteService) {}
 
   @Post('add-existing-mentee/:mentorId/:menteeId') // Define route parameters in the URL
   addMentee(
@@ -39,6 +40,7 @@ export class MenteeController {
     @Param('menteeId') menteeId: string,
   ) {
     Logger.log('Delete Mentee Controller Reached');
+    this.noteService.deleteAllNotes(mentorId, menteeId);
     return this.menteeService.deleteMentee(mentorId, menteeId);
   }
 

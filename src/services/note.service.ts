@@ -11,33 +11,45 @@ import { randomUUID } from 'crypto';
 export class NoteService {
 
   async getNotes(mentorId: string, menteeId: string): Promise<Prayer[]> {
-    return prayerDb[mentorId][menteeId];
+    if (prayerDb[mentorId] && prayerDb[mentorId][menteeId])
+      return prayerDb[mentorId][menteeId];
+    else {
+      return;
+    }
   }
 
   async createNote(mentorId: string, menteeId: string, content: string) {
-    prayerDb[mentorId][menteeId].push(
-      new Prayer( content, new Date())
-    );
-    return prayerDb[mentorId][menteeId];
+    if (prayerDb[mentorId] && prayerDb[mentorId][menteeId]) {
+      prayerDb[mentorId][menteeId].push(
+        new Prayer( content, new Date())
+      );
+      return prayerDb[mentorId][menteeId];
+    }
+    return;
   }
 
   async editNote(mentorId: string, menteeId: string, noteId: string, content: string) {
-    const note = prayerDb[mentorId][menteeId].find(item => (item.id === noteId));
-    note.content = content;
-    return note;
+    if (prayerDb[mentorId] && prayerDb[mentorId][menteeId]) {
+      const note = prayerDb[mentorId][menteeId].find(item => (item.id === noteId));
+      if (note !== null && note !== undefined) {
+        note.content = content;
+        return note;
+      }
+    }
+    return;
   }
-
-  // async toggleAnswered(id: string) {
-  //   const note = await this.noteRepository.findOne({ where: { id } });
-  //   note.isAnswered = !note.isAnswered;
-  //   return this.noteRepository.save(note);
-  // }
 
   async deleteNote(mentorId: string, menteeId: string, id: string) {
     const indexToRemove: number = prayerDb[mentorId][menteeId].findIndex( note => note.id === id );
     if (indexToRemove !== -1) {
-      prayerDb[mentorId][menteeId].splice(indexToRemove,1)
+      prayerDb[mentorId][menteeId].splice(indexToRemove,1);
     }
     return prayerDb[mentorId][menteeId];
+  }
+
+  async deleteAllNotes(mentorId: string, menteeId: string) {
+    if (prayerDb[mentorId] && prayerDb[mentorId][menteeId])
+      delete prayerDb[mentorId][menteeId];
+    return prayerDb;
   }
 }

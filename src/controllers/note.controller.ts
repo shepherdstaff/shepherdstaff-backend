@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
 import { NoteService } from '../services/note.service';
-import { NoteType } from '../entities/note.entity';
 import { Prayer } from 'src/interfaces/notes';
 
 @Controller('api')
