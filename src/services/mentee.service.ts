@@ -1,8 +1,9 @@
 // services/mentee.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { Appointment, AppointmentStatus } from '../interfaces/appointments';
-import { mentorAvailabilityDb, menteeAvailabilityDb, appointmentsDb , mentorToMenteeMapDb} from '../hacked-database';
+import { mentorAvailabilityDb, menteeAvailabilityDb, appointmentsDb , mentorToMenteeMapDb, menteeDb} from '../hacked-database';
 import { CalendarEvent } from '../interfaces/availability';
+import { Mentee } from '../interfaces/mentee';
 
 
 @Injectable()
@@ -18,7 +19,39 @@ export class MenteeService {
 
     // Add mentee's events to the mentorToMenteeMapDb
     mentorToMenteeMapDb[mentorId].push(menteeId);
-    Logger.log(`Added new mentee - ${mentorId} - ${menteeId}`);
+    Logger.log(`Added new mentee to mentorToMenteeMapDb - ${mentorId} - ${menteeId}`);
+  }
+
+  addNewMentee(mentorId: string, name: string, birthday: string) {
+    if (mentorToMenteeMapDb[mentorId] == null) {
+      Logger.warn('MentorId not found, add a mentor first.');
+      return; // Stop further execution
+    }
+
+    let isPresentInMenteeDb = false;
+    let existingMenteeId = "";
+    // Iterate over all keys (mentee IDs) in menteeDb
+    for (const menteeId in menteeDb) {
+      const menteeName = menteeDb[menteeId][0]; // Destructure to get the mentee's name
+
+      if (menteeName === name) {
+        existingMenteeId = menteeId;
+        isPresentInMenteeDb = true;
+      }
+    }
+    const newBirthday = new Date(birthday);
+    const newMenteeId = (existingMenteeId == "") ? this.generateNewMenteeId() : existingMenteeId;
+    const newMentee = new Mentee(newMenteeId, name, newBirthday);
+
+    this.addMentee(mentorId, newMenteeId);
+    menteeDb[newMenteeId] = [name, newBirthday];
+
+    Logger.log(`Added new mentee to menteeDb - ${newMenteeId}, ${name}, ${newBirthday.toLocaleDateString()}`);
+  }
+
+  generateNewMenteeId(): string {
+    const newIndex = Object.keys(menteeDb).length + 1;
+    return "mentee-" + newIndex;
   }
 
   deleteMentee(mentorId: string, menteeId: string) {
@@ -50,52 +83,5 @@ export class MenteeService {
       return { mentorId, mentees: [], message: `No mentees found for mentor ${mentorId}` }; // Empty array
     }
   }
-
-
-//   // Create a new appointment
-//   createAppointment(menteeId: string, mentorId: string, startDateTime: Date, endDateTime: Date): Appointment {
-//     const id = `${menteeId}-${mentorId}-${Date.now()}`; // Simple ID generation
-//     const appointment: Appointment = {
-//       id,
-//       status: AppointmentStatus.PENDING,
-//       menteeId,
-//       mentorId,
-//       startDateTime,
-//       endDateTime,
-//     };
-//
-//     // Save appointment in appointmentsDb
-//     if (!appointmentsDb[mentorId]) {
-//       appointmentsDb[mentorId] = {};
-//     }
-//     appointmentsDb[mentorId][menteeId] = appointment;
-//
-//     return appointment;
-//   }
-//
-//   // Read all appointments for a specific mentee
-//   getAppointmentsByMentee(menteeId: string): Appointment[] {
-//     return Object.values(appointmentsDb).flatMap(mentorAppointments =>
-//       Object.values(mentorAppointments).filter(appointment => appointment.menteeId === menteeId)
-//     );
-//   }
-//
-//   // Update an appointment's status
-//   updateAppointment(mentorId: string, menteeId: string, status: AppointmentStatus): Appointment | null {
-//     const appointment = appointmentsDb[mentorId]?.[menteeId];
-//     if (appointment) {
-//       appointment.status = status;
-//       return appointment;
-//     }
-//     return null; // Appointment not found
-//   }
-//
-//   // Delete an appointment
-//   deleteAppointment(mentorId: string, menteeId: string): boolean {
-//     if (appointmentsDb[mentorId]?.[menteeId]) {
-//       delete appointmentsDb[mentorId][menteeId];
-//       return true; // Successfully deleted
-//     }
-//     return false; // Appointment not found
-//   }
+  
 }

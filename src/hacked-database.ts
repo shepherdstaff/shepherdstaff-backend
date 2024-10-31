@@ -7,6 +7,10 @@ import { randomUUID } from 'crypto';
 export const mockMenteeId = 'mentee-1';
 export const mockMentorId = 'mentor-1';
 
+export const mockMenteeName = 'John';
+export const mockMenteeBirthday = "2008-07-12T00:00:00.000Z"
+
+
 const mockEventsMentor = [
   {
     isFullDay: true,
@@ -173,4 +177,8 @@ export const appointmentsDb: {
 
 export const mentorToMenteeMapDb: { [mentorId: string]: string[] } = {
   [mockMentorId]: [mockMenteeId],
+};
+
+export const menteeDb: { [menteeId: string]: (string |  Date)[] } = {
+  [mockMenteeId] : [mockMenteeName, new Date(mockMenteeBirthday)]
 };

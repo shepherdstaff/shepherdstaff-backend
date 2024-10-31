@@ -10,7 +10,7 @@ import { CalendarEvent } from '../interfaces/availability';
 export class MenteeController {
   constructor(private readonly menteeService: MenteeService) {}
 
-  @Post('add/:mentorId/:menteeId') // Define route parameters in the URL
+  @Post('add-existing-mentee/:mentorId/:menteeId') // Define route parameters in the URL
   addMentee(
     @Param('mentorId') mentorId: string, // Extract mentorId from URL
     @Param('menteeId') menteeId: string, // Extract menteeId from URL
@@ -21,8 +21,17 @@ export class MenteeController {
   /*
     //Use this to test postman post request:
 
-    http://localhost:3000/mentee/add/mentor-1/mentee-2
+    http://localhost:3000/mentee/add-existing-mentee/mentor-1/mentee-2
   */
+
+  @Post('add-new-mentee/:mentorId') // Define route parameters in the URL
+  addNewMentee(
+    @Param('mentorId') mentorId: string, // Extract mentorId from URL
+    @Body() menteeData: { name: string; birthday: string }
+  ) {
+    Logger.log('Adding New Mentee Controller Reached');
+    return this.menteeService.addNewMentee(mentorId, menteeData.name, menteeData.birthday);
+  }
 
   @Delete('delete/:mentorId/:menteeId')
   deleteMentee(
