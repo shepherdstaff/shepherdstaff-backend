@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { MeetingRecommendationService } from '../services/meeting-recommendation.service';
 
 @Controller('api/meetings')
@@ -29,5 +29,10 @@ export class MeetingController {
   @Get()
   async getAppointments(@Query('mentorId') mentorId: string) {
     return this.meetingRecommendationService.getAppointments(mentorId);
+  }
+
+  @Post('check')
+  async checkAppointments() {
+    return this.meetingRecommendationService.checkAppointments();
   }
 }
