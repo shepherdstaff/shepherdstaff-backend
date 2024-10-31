@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
-import { AIService } from '../services/ai.service';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { AIService } from '../services/ai.service';
 
 @Controller('api/chat')
 export class ChatController {
@@ -25,7 +25,7 @@ export class ChatController {
     this.messages.push(userMessage);
 
     // Generate AI response
-    const aiResponse = await this.aiService.generateResponse(body.content, body.context);
+    const aiResponse = await this.aiService.generateChatbotResponse(body.content, body.context);
     
     // Add AI message
     const aiMessage = {

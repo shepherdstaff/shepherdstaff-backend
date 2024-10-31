@@ -28,8 +28,8 @@ export class AIService {
       This is the array for the mentee:\n
       ${JSON.stringify(menteeEvents)}\n
       
-      Please recommend the next closest available date time for the two persons to meet. 
-      The recommended date time should take place between 9am to 8pm. 
+      Please recommend the next closest available date time for the two persons to meet. Assume that the meeting will take place for 2 hours.
+      The recommended date time should take place between 9am to 8pm. Please check carefully that the recommended date time does not clash with any existing scheduled event.
       The current date time is ${new Date().toISOString()}. Provide the date time as an ISO string prefixed with ${RECOMMENDED_DATE_RESULT_PREFIX}. 
       Only recommend the date time, no code or explanation is needed.`;
 
@@ -46,7 +46,7 @@ export class AIService {
     );
   }
 
-  async generateResponse(
+  async generateChatbotResponse(
     message: string,
     context?: {
       menteeId?: string;

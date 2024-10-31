@@ -1,15 +1,17 @@
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Appointment } from './interfaces/appointments';
 import { CalendarEvent } from './interfaces/availability';
 import { Prayer } from './interfaces/notes';
-import { randomUUID } from 'crypto';
 
-export const mockMenteeId = 'mentee-1';
+export const mockMentee1Id = 'mentee-1';
+export const mockMentee2Id = 'mentee-2';
+export const mockMentee3Id = 'mentee-3';
+export const mockMentee4Id = 'mentee-4';
+export const mockMentee5Id = 'mentee-5';
+
 export const mockMentorId = 'mentor-1';
 
 export const mockMenteeName = 'John';
-export const mockMenteeBirthday = "2008-07-12T00:00:00.000Z"
-
+export const mockMenteeBirthday = '2008-07-12T00:00:00.000Z';
 
 const mockEventsMentor = [
   {
@@ -117,36 +119,142 @@ const mockEventsMentee = [
   },
 ];
 
+const mockEventsMentee2 = [
+  {
+    isFullDay: true,
+    startDateTime: '2024-11-15T00:00:00.000Z',
+    endDateTime: '2024-11-17T00:00:00.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2024-12-10T10:30:00.000Z',
+    endDateTime: '2024-12-10T15:45:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-01-02T00:00:00.000Z',
+    endDateTime: '2025-01-02T23:59:59.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2025-02-14T09:00:00.000Z',
+    endDateTime: '2025-02-14T17:30:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-03-20T00:00:00.000Z',
+    endDateTime: '2025-03-23T00:00:00.000Z',
+  },
+];
+
+const mockEventsMentee3 = [
+  {
+    isFullDay: false,
+    startDateTime: '2024-12-05T14:00:00.000Z',
+    endDateTime: '2024-12-05T19:00:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-01-10T00:00:00.000Z',
+    endDateTime: '2025-01-12T00:00:00.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2025-02-22T11:15:00.000Z',
+    endDateTime: '2025-02-22T16:30:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-04-05T00:00:00.000Z',
+    endDateTime: '2025-04-05T23:59:59.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2025-05-18T08:45:00.000Z',
+    endDateTime: '2025-05-18T12:15:00.000Z',
+  },
+];
+
+const mockEventsMentee4 = [
+  {
+    isFullDay: true,
+    startDateTime: '2024-10-30T00:00:00.000Z',
+    endDateTime: '2024-11-01T00:00:00.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2024-12-15T16:30:00.000Z',
+    endDateTime: '2024-12-15T20:45:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-02-01T00:00:00.000Z',
+    endDateTime: '2025-02-03T00:00:00.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2025-03-10T13:00:00.000Z',
+    endDateTime: '2025-03-10T18:30:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-05-15T00:00:00.000Z',
+    endDateTime: '2025-05-17T00:00:00.000Z',
+  },
+];
+
+const mockEventsMentee5 = [
+  {
+    isFullDay: false,
+    startDateTime: '2024-11-20T09:45:00.000Z',
+    endDateTime: '2024-11-20T14:15:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2024-12-25T00:00:00.000Z',
+    endDateTime: '2024-12-27T00:00:00.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2025-01-15T15:30:00.000Z',
+    endDateTime: '2025-01-15T20:00:00.000Z',
+  },
+  {
+    isFullDay: true,
+    startDateTime: '2025-03-01T00:00:00.000Z',
+    endDateTime: '2025-03-03T00:00:00.000Z',
+  },
+  {
+    isFullDay: false,
+    startDateTime: '2025-04-20T10:00:00.000Z',
+    endDateTime: '2025-04-20T15:30:00.000Z',
+  },
+];
 
 const mockPrayers = [
   {
     content: 'A very long and detailed prayer request.',
-    date: '2025-04-14T00:00:00.000Z'
+    date: '2025-04-14T00:00:00.000Z',
   },
   {
     content: 'A very long and detailed prayer request.',
-    date: '2025-07-12T00:00:00.000Z'
-  }
+    date: '2025-07-12T00:00:00.000Z',
+  },
 ];
 
 export const prayerDb: {
   [mentorId: string]: {
-    [menteeId: string]: Prayer[]
-  }
+    [menteeId: string]: Prayer[];
+  };
 } = {
   [mockMentorId]: {
-    [mockMenteeId]: mockPrayers.map(
-      (prayer) =>
-      new Prayer(
-        prayer.content,
-        new Date(prayer.date)
-      )
-    )
-  }
+    [mockMentee1Id]: mockPrayers.map(
+      (prayer) => new Prayer(prayer.content, new Date(prayer.date)),
+    ),
+  },
 };
 
 export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
-
   [mockMentorId]: mockEventsMentor.map(
     (event) =>
       new CalendarEvent(
@@ -156,15 +264,24 @@ export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
       ),
   ),
 };
-export const menteeAvailabilityDb: { [menteeId: string]: CalendarEvent[] } = {
-  [mockMenteeId]: mockEventsMentee.map(
+
+const mockEventsToCalendarEvents = (events: any[]) => {
+  return events.map(
     (event) =>
       new CalendarEvent(
         event.isFullDay,
         new Date(event.startDateTime),
         new Date(event.endDateTime),
       ),
-  ),
+  );
+};
+
+export const menteeAvailabilityDb: { [menteeId: string]: CalendarEvent[] } = {
+  [mockMentee1Id]: mockEventsToCalendarEvents(mockEventsMentee),
+  [mockMentee2Id]: mockEventsToCalendarEvents(mockEventsMentee2),
+  [mockMentee3Id]: mockEventsToCalendarEvents(mockEventsMentee3),
+  [mockMentee4Id]: mockEventsToCalendarEvents(mockEventsMentee4),
+  [mockMentee5Id]: mockEventsToCalendarEvents(mockEventsMentee5),
 };
 
 export const appointmentsDb: {
@@ -176,9 +293,19 @@ export const appointmentsDb: {
 };
 
 export const mentorToMenteeMapDb: { [mentorId: string]: string[] } = {
-  [mockMentorId]: [mockMenteeId],
+  [mockMentorId]: [
+    mockMentee1Id,
+    mockMentee2Id,
+    mockMentee3Id,
+    mockMentee4Id,
+    mockMentee5Id,
+  ],
 };
 
-export const menteeDb: { [menteeId: string]: (string |  Date)[] } = {
-  [mockMenteeId] : [mockMenteeName, new Date(mockMenteeBirthday)]
+export const menteeDb: { [menteeId: string]: (string | Date)[] } = {
+  [mockMentee1Id]: [mockMenteeName, new Date(mockMenteeBirthday)],
+  [mockMentee2Id]: ['Jane', new Date('2005-05-12T00:00:00.000Z')],
+  [mockMentee3Id]: ['Alice', new Date('2007-09-30T00:00:00.000Z')],
+  [mockMentee4Id]: ['Bob', new Date('2006-01-15T00:00:00.000Z')],
+  [mockMentee5Id]: ['Charlie', new Date('2009-03-25T00:00:00.000Z')],
 };
