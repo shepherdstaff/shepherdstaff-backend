@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { MessageDto, MessageRequestDto } from 'src/dtos/message.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { AIService } from '../services/ai.service';
 
 @Controller('api/chat')
 export class ChatController {
-  private messages: any[] = [];
+  private messages: MessageDto[] = [];
 
   constructor(private readonly aiService: AIService) {}
 
@@ -14,7 +15,10 @@ export class ChatController {
   }
 
   @Post('messages')
-  async createMessage(@Body() body: { content: string; context?: any }) {
+  async createMessage(
+    @Body()
+    body: MessageRequestDto,
+  ) {
     // Add user message
     const userMessage = {
       id: uuidv4(),
@@ -25,8 +29,11 @@ export class ChatController {
     this.messages.push(userMessage);
 
     // Generate AI response
-    const aiResponse = await this.aiService.generateChatbotResponse(body.content, body.context);
-    
+    const aiResponse = await this.aiService.generateChatbotResponse(
+      body.content,
+      body.context,
+    );
+
     // Add AI message
     const aiMessage = {
       id: uuidv4(),
