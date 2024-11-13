@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { UserType } from 'src/interfaces/users';
-import { CalendarSyncService } from '../services/calendar-sync.service';
+import { CalendarSyncService } from './calendar-sync.service';
 
 @Controller('api/calendar')
 export class CalendarController {

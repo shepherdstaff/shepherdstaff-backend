@@ -1,32 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CalendarController } from './controllers/calendar.controller';
 import { ChatController } from './controllers/chat.controller';
 import { MeetingController } from './controllers/meeting.controller';
 import { MenteeController } from './controllers/mentee.controller'; // Import MenteeController
+import { CalendarModule } from './modules/calendar/calendar.module';
+import { UsersModule } from './modules/users/users.module';
 import { AIService } from './services/ai.service';
-import { CalendarSyncService } from './services/calendar-sync.service';
 import { MeetingRecommendationService } from './services/meeting-recommendation.service';
 import { MenteeService } from './services/mentee.service'; // Import MenteeService
-import { NoteService } from './services/note.service';
-import { NoteController } from './controllers/note.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot(), ScheduleModule.forRoot()],
-  controllers: [
-    CalendarController,
-    ChatController,
-    MeetingController,
-    MenteeController,
-    NoteController
+  imports: [
+    ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
+    UsersModule,
+    CalendarModule,
   ],
-  providers: [
-    AIService,
-    CalendarSyncService,
-    MeetingRecommendationService,
-    MenteeService,
-    NoteService
-  ],
+  controllers: [ChatController, MeetingController, MenteeController],
+  providers: [AIService, MeetingRecommendationService, MenteeService],
 })
 export class AppModule {}

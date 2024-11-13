@@ -1,10 +1,7 @@
 // controllers/mentee.controller.ts
-import { Body, Controller, Delete, Get, Param, Post, Put, Logger } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Post } from '@nestjs/common';
+import { NoteService } from 'src/modules/users/note.service';
 import { MenteeService } from '../services/mentee.service';
-import { NoteService } from 'src/services/note.service';
-import { Appointment } from '../interfaces/appointments';
-import { AppointmentStatus } from '../interfaces/appointments';
-import { CalendarEvent } from '../interfaces/availability';
 
 
 @Controller('mentee')

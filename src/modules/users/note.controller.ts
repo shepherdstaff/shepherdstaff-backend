@@ -1,6 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
-import { NoteService } from '../services/note.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Prayer } from 'src/interfaces/notes';
+import { NoteService } from './note.service';
 
 @Controller('api')
 export class NoteController {
@@ -10,7 +18,7 @@ export class NoteController {
   async getNotes(
     @Param('mentorId') mentorId: string,
     @Param('menteeId') menteeId: string,
-  ){
+  ) {
     return this.noteService.getNotes(mentorId, menteeId);
   }
 
@@ -18,7 +26,7 @@ export class NoteController {
   async createNote(
     @Param('mentorId') mentorId: string,
     @Param('menteeId') menteeId: string,
-    @Body() prayer: Prayer
+    @Body() prayer: Prayer,
   ) {
     return this.noteService.createNote(mentorId, menteeId, prayer.content);
   }
@@ -28,16 +36,21 @@ export class NoteController {
     @Param('mentorId') mentorId: string,
     @Param('menteeId') menteeId: string,
     @Param('noteId') noteId: string,
-    @Body() prayer: Prayer
+    @Body() prayer: Prayer,
   ) {
-    return this.noteService.editNote(mentorId, menteeId, noteId, prayer.content);
+    return this.noteService.editNote(
+      mentorId,
+      menteeId,
+      noteId,
+      prayer.content,
+    );
   }
 
   @Delete(':mentorId/mentees/:menteeId/notes/:noteId')
   async deleteNote(
     @Param('mentorId') mentorId: string,
     @Param('menteeId') menteeId: string,
-    @Param('noteId') noteId: string
+    @Param('noteId') noteId: string,
   ) {
     return this.noteService.deleteNote(mentorId, menteeId, noteId);
   }
