@@ -2,7 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RoleEnum } from '../constants/roles';
@@ -12,16 +12,20 @@ import { UserEntity } from './user.entity';
   name: 'user_relation',
 })
 export class UserRelationEntity {
+  constructor(props?: Partial<UserRelationEntity>) {
+    if (props) Object.assign(this, props);
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.outgoingUserRelations)
   @JoinColumn({ name: 'fk_from_user_id' })
-  fromUserId: UserEntity;
+  fromUser: UserEntity;
 
-  @OneToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.incomingUserRelations)
   @JoinColumn({ name: 'fk_to_user_id' })
-  toUserId: UserEntity;
+  toUser: UserEntity;
 
   @Column()
   fromRole: RoleEnum;

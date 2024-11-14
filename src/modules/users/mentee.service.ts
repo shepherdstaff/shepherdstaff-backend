@@ -54,7 +54,16 @@ export class MenteeService {
     // );
     const newMentee = new Mentee({ name, birthdate, email });
 
-    return this.usersRepository.createUser(newMentee);
+    const createdMenteeEntity =
+      await this.usersRepository.createUser(newMentee);
+    newMentee.id = createdMenteeEntity.id;
+
+    await this.usersRepository.setMenteeForMentorUser(
+      mentorId,
+      createdMenteeEntity.id,
+    );
+
+    return newMentee;
   }
 
   generateNewMenteeId(): string {

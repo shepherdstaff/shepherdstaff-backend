@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../domain/user';
+import { UserRelationEntity } from './user-relation.entity';
 
 @Entity({
   name: 'user',
@@ -16,6 +17,18 @@ export class UserEntity {
 
   @Column()
   birthdate: Date;
+
+  @OneToMany(
+    () => UserRelationEntity,
+    (userRelationEntity) => userRelationEntity.fromUser,
+  )
+  outgoingUserRelations: UserRelationEntity[];
+
+  @OneToMany(
+    () => UserRelationEntity,
+    (userRelationEntity) => userRelationEntity.toUser,
+  )
+  incomingUserRelations: UserRelationEntity[];
 
   static from(user: User): UserEntity {
     const userEntity = new UserEntity();
