@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   appointmentsDb,
   menteeAvailabilityDb,
@@ -142,7 +141,7 @@ export class MeetingRecommendationService {
   }
 
   // NOTE: This method will constantly call ChatGPT, so please comment out if not testing the recommendation feature
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  // @Cron(CronExpression.EVERY_30_SECONDS)
   async checkAppointments() {
     const now = new Date();
     for (const mentorId in mentorToMenteeMapDb) {
