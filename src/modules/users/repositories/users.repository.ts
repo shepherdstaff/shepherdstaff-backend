@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RoleEnum } from './constants/roles';
-import { User } from './domain/user';
-import { UserRelationEntity } from './entities/user-relation.entity';
-import { UserEntity } from './entities/user.entity';
+import { RoleEnum } from '../constants/roles';
+import { User } from '../domain/user';
+import { UserRelationEntity } from '../entities/user-relation.entity';
+import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
 export class UsersRepository {

@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { Prayer } from 'src/interfaces/notes';
-import { NoteService } from './note.service';
+import { NoteService } from '../services/note.service';
 
 @Controller('api')
 export class NoteController {

@@ -8,9 +8,9 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { NoteService } from 'src/modules/users/note.service';
-import { CreateMenteeDto } from './dto/mentee.dto';
-import { MenteeService } from './mentee.service';
+import { NoteService } from 'src/modules/users/services/note.service';
+import { CreateMenteeDto } from '../dto/mentee.dto';
+import { MenteeService } from '../services/mentee.service';
 
 @Controller('mentee')
 export class MenteeController {

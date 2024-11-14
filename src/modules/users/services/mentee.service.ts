@@ -1,8 +1,8 @@
 // services/mentee.service.ts
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { menteeDb, mentorToMenteeMapDb } from '../../hacked-database';
-import { Mentee } from './domain/mentee';
-import { UsersRepository } from './users.repository';
+import { menteeDb, mentorToMenteeMapDb } from '../../../hacked-database';
+import { Mentee } from '../domain/mentee';
+import { UsersRepository } from '../repositories/users.repository';
 
 @Injectable()
 export class MenteeService {

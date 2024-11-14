@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Mentor } from './domain/mentor';
-import { UsersRepository } from './users.repository';
+import { Mentor } from '../domain/mentor';
+import { UsersRepository } from '../repositories/users.repository';
 
 @Injectable()
 export class MentorService {

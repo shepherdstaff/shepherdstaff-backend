@@ -6,7 +6,7 @@ import {
   menteeDb,
   mentorAvailabilityDb,
 } from 'src/hacked-database';
-import { NoteService } from '../modules/users/note.service';
+import { NoteService } from '../modules/users/services/note.service';
 
 const RECOMMENDED_DATE_RESULT_PREFIX = '==RESULT==';
 @Injectable()
