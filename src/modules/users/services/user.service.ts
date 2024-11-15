@@ -2,10 +2,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { menteeDb, mentorToMenteeMapDb } from '../../../hacked-database';
 import { Mentee } from '../domain/mentee';
+import { Mentor } from '../domain/mentor';
 import { UsersRepository } from '../repositories/users.repository';
 
 @Injectable()
-export class MenteeService {
+export class UserService {
   constructor(@Inject() private usersRepository: UsersRepository) {}
 
   async attachMenteeToMentor(mentorId: string, menteeId: string) {
@@ -30,28 +31,6 @@ export class MenteeService {
     birthdate: Date,
     email: string,
   ) {
-    // if (mentorToMenteeMapDb[mentorId] == null) {
-    //   throw new Error('MentorId not found, add a mentor first.');
-    // }
-    // let isPresentInMenteeDb = false;
-    // let existingMenteeId = '';
-    // // Iterate over all keys (mentee IDs) in menteeDb
-    // for (const menteeId in menteeDb) {
-    //   const menteeName = menteeDb[menteeId][0]; // Destructure to get the mentee's name
-    //   if (menteeName === name) {
-    //     existingMenteeId = menteeId;
-    //     isPresentInMenteeDb = true;
-    //   }
-    // }
-    // const newBirthday = new Date(birthday);
-    // const newMenteeId =
-    //   existingMenteeId == '' ? this.generateNewMenteeId() : existingMenteeId;
-    // const newMentee = new Mentee(newMenteeId, name, newBirthday);
-    // this.attachMenteeToMentor(mentorId, newMenteeId);
-    // menteeDb[newMenteeId] = [name, newBirthday];
-    // Logger.log(
-    //   `Added new mentee to menteeDb - ${newMenteeId}, ${name}, ${newBirthday.toLocaleDateString()}`,
-    // );
     const newMentee = new Mentee({ name, birthdate, email });
 
     const createdMenteeEntity =
@@ -103,5 +82,25 @@ export class MenteeService {
         message: `No mentees found for mentor ${mentorId}`,
       }; // Empty array
     }
+  }
+
+  async createNewMentor(
+    name: string,
+    birthdate: Date,
+    email: string,
+    userName: string,
+    pass: string,
+  ) {
+    const newMentor = new Mentor({ name, birthdate, email });
+
+    return this.usersRepository.createUser(newMentor, userName, pass);
+  }
+
+  async getMentor(mentorId: string) {
+    return this.usersRepository.findMentorById(mentorId);
+  }
+
+  async getUserByUsername(userName: string) {
+    return this.usersRepository.findUserByUserName(userName);
   }
 }

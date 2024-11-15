@@ -1,21 +1,25 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateMentorDto } from '../dto/mentor.dto';
-import { MentorService } from '../services/mentor.service';
+import { UserService } from '../services/user.service';
 
 @Controller('mentor')
 export class MentorController {
-  constructor(
-    @Inject(MentorService) private readonly mentorService: MentorService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   async createNewMentor(@Body() mentorDto: CreateMentorDto) {
-    const { name, birthdate, email } = mentorDto;
-    return this.mentorService.createNewMentor(name, new Date(birthdate), email);
+    const { name, birthdate, email, userName, pass } = mentorDto;
+    return this.userService.createNewMentor(
+      name,
+      new Date(birthdate),
+      email,
+      userName,
+      pass,
+    );
   }
 
   @Get()
   async getMentor(@Param('mentorId') mentorId: string) {
-    return this.mentorService.getMentor(mentorId);
+    return this.userService.getMentor(mentorId);
   }
 }

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleEnum } from '../constants/roles';
 import { User } from '../domain/user';
+import { UserAuthEntity } from '../entities/user-auth.entity';
 import { UserRelationEntity } from '../entities/user-relation.entity';
 import { UserEntity } from '../entities/user.entity';
 
@@ -13,10 +14,29 @@ export class UsersRepository {
     private userRepository: Repository<UserEntity>,
     @InjectRepository(UserRelationEntity)
     private userRelationRepository: Repository<UserRelationEntity>,
+    @InjectRepository(UserAuthEntity)
+    private userAuthRepository: Repository<UserAuthEntity>,
   ) {}
 
-  async createUser(user: User): Promise<UserEntity> {
-    return this.userRepository.save(UserEntity.from(user));
+  async createUser(
+    user: User,
+    userName?: string,
+    pass?: string,
+  ): Promise<UserEntity> {
+    const createdUserEntity = await this.userRepository.save(
+      UserEntity.from(user),
+    );
+
+    if (userName && pass) {
+      const userAuthEntity = new UserAuthEntity({
+        userName,
+        hash: pass,
+        user: createdUserEntity,
+      });
+      await this.userAuthRepository.save(userAuthEntity);
+    }
+
+    return createdUserEntity;
   }
 
   // Only user info, no relations
@@ -24,9 +44,18 @@ export class UsersRepository {
     return this.userRepository.findOneBy({ id });
   }
 
+  async findUserByUserName(userName: string): Promise<UserAuthEntity> {
+    const userAuthEntity = await this.userAuthRepository.findOne({
+      where: { userName },
+      relations: ['user'],
+    });
+
+    return userAuthEntity;
+  }
+
   // Find user from the perspective of a mentor - populate with mentees
   async findMentorById(id: string): Promise<UserEntity> {
-    const mentorEntity = await this.userRepository.find({
+    const mentorEntity = await this.userRepository.findOne({
       where: { id },
       relations: {
         outgoingUserRelations: {
@@ -35,7 +64,7 @@ export class UsersRepository {
       },
     });
 
-    return mentorEntity[0];
+    return mentorEntity;
   }
 
   // async findUserMentees(id: string): Promise<UserEntity[]> {}

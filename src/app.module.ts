@@ -4,8 +4,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatController } from './controllers/chat.controller';
 import { MeetingController } from './controllers/meeting.controller';
+import { AuthModule } from './modules/auth/auth.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
-import { UsersModule } from './modules/users/users.module';
+import { UserModule } from './modules/users/user.module';
 import { AIService } from './services/ai.service';
 import { MeetingRecommendationService } from './services/meeting-recommendation.service';
 
@@ -23,8 +24,9 @@ import { MeetingRecommendationService } from './services/meeting-recommendation.
     }),
     ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
-    UsersModule,
+    UserModule,
     CalendarModule,
+    AuthModule,
   ],
   controllers: [ChatController, MeetingController],
   providers: [AIService, MeetingRecommendationService],

@@ -10,12 +10,12 @@ import {
 } from '@nestjs/common';
 import { NoteService } from 'src/modules/users/services/note.service';
 import { CreateMenteeDto } from '../dto/mentee.dto';
-import { MenteeService } from '../services/mentee.service';
+import { UserService } from '../services/user.service';
 
 @Controller('mentee')
 export class MenteeController {
   constructor(
-    private readonly menteeService: MenteeService,
+    private readonly userService: UserService,
     private readonly noteService: NoteService,
   ) {}
 
@@ -25,7 +25,7 @@ export class MenteeController {
     @Param('menteeId') menteeId: string, // Extract menteeId from URL
   ) {
     Logger.log('MenteeController Reached');
-    return this.menteeService.attachMenteeToMentor(mentorId, menteeId);
+    return this.userService.attachMenteeToMentor(mentorId, menteeId);
   }
   /*
     //Use this to test postman post request:
@@ -39,7 +39,7 @@ export class MenteeController {
     @Body() menteeData: CreateMenteeDto,
   ) {
     Logger.log('Adding New Mentee Controller Reached');
-    return this.menteeService.createNewMentee(
+    return this.userService.createNewMentee(
       mentorId,
       menteeData.name,
       new Date(menteeData.birthdate),
@@ -54,13 +54,13 @@ export class MenteeController {
   ) {
     Logger.log('Delete Mentee Controller Reached');
     this.noteService.deleteAllNotes(mentorId, menteeId);
-    return this.menteeService.deleteMentee(mentorId, menteeId);
+    return this.userService.deleteMentee(mentorId, menteeId);
   }
 
   @Get('list/:mentorId')
   async listAllMentees(@Param('mentorId') mentorId: string) {
     Logger.log('List All Mentees Controller Reached');
-    return this.menteeService.getAllMentees(mentorId);
+    return this.userService.getAllMentees(mentorId);
   }
 
   //   // Create an appointment
