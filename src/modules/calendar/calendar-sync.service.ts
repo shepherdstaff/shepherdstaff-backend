@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { google } from 'googleapis';
+import { ConfigService } from '@nestjs/config';
+import { Auth, google } from 'googleapis';
 import {
   menteeAvailabilityDb,
   mentorAvailabilityDb,
@@ -9,7 +10,27 @@ import { UserType } from 'src/interfaces/users';
 
 @Injectable()
 export class CalendarSyncService {
-  constructor() {}
+  private googleOauth2Client: Auth.OAuth2Client;
+
+  constructor(private configService: ConfigService) {
+    // Setup your API client
+    this.googleOauth2Client = new google.auth.OAuth2(
+      this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+      'http://localhost:3000/api/calendar/google-oauth-callback',
+    );
+  }
+
+  async initiateGoogleOAuth() {
+    const scopes = ['https://www.googleapis.com/auth/calendar'];
+    const url = this.googleOauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+    });
+    return url;
+  }
+
+  async googleOAuthCallback(code: string) {}
 
   async syncCalendar(token: string, userType: UserType, userId: string) {
     const calendar = google.calendar({ version: 'v3', auth: token });

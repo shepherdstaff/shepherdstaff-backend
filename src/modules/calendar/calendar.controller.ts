@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UserType } from 'src/interfaces/users';
 import { CalendarSyncService } from './calendar-sync.service';
 
@@ -15,5 +15,10 @@ export class CalendarController {
       body.userType,
       body.userId,
     );
+  }
+
+  @Get('google-oauth-callback')
+  async googleOAuthCallback(@Param('code') code: string) {
+    return this.calendarSyncService.googleOAuthCallback(code);
   }
 }

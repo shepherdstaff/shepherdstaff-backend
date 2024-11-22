@@ -6,6 +6,7 @@ import { UserService } from '../services/user.service';
 export class MentorController {
   constructor(private readonly userService: UserService) {}
 
+  // TODO: Move to AuthController
   @Post()
   async createNewMentor(@Body() mentorDto: CreateMentorDto) {
     const { name, birthdate, email, userName, pass } = mentorDto;
