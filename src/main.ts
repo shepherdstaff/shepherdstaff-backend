@@ -9,6 +9,15 @@ async function bootstrap() {
     .setTitle('Fellowship App Backend')
     .setDescription('Backend API for #HACK2024 Fellowship App')
     .setVersion('1.0')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'Authorization',
+      description: 'Place your JWT token here',
+      in: 'header',
+    })
+    .addSecurityRequirements('Bearer')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

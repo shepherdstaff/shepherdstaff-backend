@@ -26,11 +26,15 @@ export class CalendarSyncService {
     const url = this.googleOauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: scopes,
+      state: 'test-state',
     });
     return url;
   }
 
-  async googleOAuthCallback(code: string) {}
+  async googleOAuthCallback(code: string) {
+    console.log('Received code:', code);
+    return code;
+  }
 
   async syncCalendar(token: string, userType: UserType, userId: string) {
     const calendar = google.calendar({ version: 'v3', auth: token });

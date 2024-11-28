@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Public } from 'src/decorators/public.decorator';
 import { CreateMentorDto } from '../dto/mentor.dto';
 import { UserService } from '../services/user.service';
 
@@ -7,6 +8,7 @@ export class MentorController {
   constructor(private readonly userService: UserService) {}
 
   // TODO: Move to AuthController
+  @Public()
   @Post()
   async createNewMentor(@Body() mentorDto: CreateMentorDto) {
     const { name, birthdate, email, userName, pass } = mentorDto;
