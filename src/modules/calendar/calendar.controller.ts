@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { UserType } from 'src/interfaces/users';
+import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { CalendarSyncService } from './calendar-sync.service';
 
 @Controller('api/calendar')
@@ -19,15 +20,18 @@ export class CalendarController {
     );
   }
 
-  @ApiBearerAuth()
   @Get('start-google-oauth')
-  async startGoogleOAuth() {
-    return this.calendarSyncService.initiateGoogleOAuth();
+  async startGoogleOAuth(@Req() req: Request) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return this.calendarSyncService.initiateGoogleOAuth(userPayload);
   }
 
   @Public()
   @Get('google-oauth-callback')
-  async googleOAuthCallback(@Param('code') code: string) {
-    return this.calendarSyncService.googleOAuthCallback(code);
+  async googleOAuthCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+  ) {
+    return this.calendarSyncService.googleOAuthCallback(code, state);
   }
 }

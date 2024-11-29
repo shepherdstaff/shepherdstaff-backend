@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
 import {
   menteeAvailabilityDb,
@@ -7,6 +8,10 @@ import {
 } from 'src/hacked-database';
 import { CalendarEvent } from 'src/interfaces/availability';
 import { UserType } from 'src/interfaces/users';
+import { UserPayload } from '../auth/interfaces/user-payload';
+
+// TODO: move to redis
+const userStateMap: { [state: string]: string } = {};
 
 @Injectable()
 export class CalendarSyncService {
@@ -21,18 +26,23 @@ export class CalendarSyncService {
     );
   }
 
-  async initiateGoogleOAuth() {
+  async initiateGoogleOAuth(userPayload: UserPayload) {
+    const userState = crypto.randomBytes(32).toString('hex');
+    userStateMap[userState] = userPayload.userId;
+
     const scopes = ['https://www.googleapis.com/auth/calendar'];
     const url = this.googleOauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: scopes,
-      state: 'test-state',
+      state: userState,
     });
     return url;
   }
 
-  async googleOAuthCallback(code: string) {
+  async googleOAuthCallback(code: string, state: string) {
     console.log('Received code:', code);
+    const userId = userStateMap[state];
+
     return code;
   }
 
