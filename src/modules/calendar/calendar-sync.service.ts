@@ -2,16 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
-import {
-  menteeAvailabilityDb,
-  mentorAvailabilityDb,
-} from 'src/hacked-database';
-import { CalendarEvent } from 'src/interfaces/availability';
-import { UserType } from 'src/interfaces/users';
+import { DateTime } from 'luxon';
 import { UserPayload } from '../auth/interfaces/user-payload';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
+const userGoogleTokenMap: { [userId: string]: any } = {};
 
 @Injectable()
 export class CalendarSyncService {
@@ -40,61 +36,101 @@ export class CalendarSyncService {
   }
 
   async googleOAuthCallback(code: string, state: string) {
-    console.log('Received code:', code);
     const userId = userStateMap[state];
 
-    return code;
-  }
+    const { tokens } = await this.googleOauth2Client.getToken(code);
+    this.googleOauth2Client.setCredentials(tokens);
 
-  async syncCalendar(token: string, userType: UserType, userId: string) {
-    const calendar = google.calendar({ version: 'v3', auth: token });
-
-    // Get events for the next month
-    const response = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: new Date().toISOString(),
-      timeMax: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      singleEvents: true,
-      orderBy: 'startTime',
+    // Retrieve user's calendar events
+    const googleCalendar = google.calendar({
+      version: 'v3',
+      auth: this.googleOauth2Client,
     });
 
-    const events = response.data.items;
-    const availability = this.processEvents(userId, userType, events);
+    const now = DateTime.now();
+    const limit = now.plus({ months: 1 }); // TODO: check how often mentor wants to meet mentee, then limit to that
 
-    return availability;
-  }
+    const calendars = (await googleCalendar.calendarList.list()).data.items;
 
-  private processEvents(userId: string, userType: UserType, events: any[]) {
-    events.forEach((event) => {
-      if (event.start?.dateTime && event.end?.dateTime) {
-        // not full day
-        const start = new Date(event.start.dateTime);
-        const end = new Date(event.end.dateTime);
+    // TODO: allow users to omit calendars
 
-        const currentEvent: CalendarEvent = new CalendarEvent(
-          false,
-          start,
-          end,
-        );
+    const userCalendarEvents = [];
+    for (const calendar of calendars) {
+      const eventsResponse = await googleCalendar.events.list({
+        calendarId: calendar.id,
+        timeMin: now.toISO(),
+        timeMax: limit.toISO(),
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
 
-        if (userType === UserType.MENTOR) {
-          mentorAvailabilityDb[userId].push(currentEvent);
-        } else if (userType === UserType.MENTEE) {
-          menteeAvailabilityDb[userId].push(currentEvent);
-        }
-      } else if (event.start?.date) {
-        // full day
-        const start = new Date(event.start.date);
-        const end = new Date(event.end.date);
+      const events = eventsResponse.data.items;
+      userCalendarEvents.push(...events);
+    }
 
-        const currentEvent: CalendarEvent = new CalendarEvent(true, start, end);
+    userCalendarEvents.sort((a, b) => {
+      const aComparison = a.start?.dateTime
+        ? DateTime.fromISO(a.start.dateTime).toMillis()
+        : DateTime.fromSQL(a.start.date).toMillis();
+      const bComparison = b.start?.dateTime
+        ? DateTime.fromISO(b.start.dateTime).toMillis()
+        : DateTime.fromSQL(b.start.date).toMillis();
 
-        if (userType === UserType.MENTOR) {
-          mentorAvailabilityDb[userId].push(currentEvent);
-        } else if (userType === UserType.MENTEE) {
-          menteeAvailabilityDb[userId].push(currentEvent);
-        }
-      }
+      return aComparison - bComparison;
     });
+
+    return userCalendarEvents;
   }
+
+  // async syncCalendar(token: string, userType: UserType, userId: string) {
+  // const calendar = google.calendar({ version: 'v3', auth: token });
+
+  // // Get events for the next month
+  // const response = await calendar.events.list({
+  //   calendarId: 'primary',
+  //   timeMin: new Date().toISOString(),
+  //   timeMax: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  //   singleEvents: true,
+  //   orderBy: 'startTime',
+  // });
+
+  // const events = response.data.items;
+  // const availability = this.processEvents(userId, userType, events);
+
+  // return availability;
+  // }
+
+  // private processEvents(userId: string, userType: UserType, events: any[]) {
+  //   events.forEach((event) => {
+  //     if (event.start?.dateTime && event.end?.dateTime) {
+  //       // not full day
+  //       const start = new Date(event.start.dateTime);
+  //       const end = new Date(event.end.dateTime);
+
+  //       const currentEvent: CalendarEvent = new CalendarEvent(
+  //         false,
+  //         start,
+  //         end,
+  //       );
+
+  //       if (userType === UserType.MENTOR) {
+  //         mentorAvailabilityDb[userId].push(currentEvent);
+  //       } else if (userType === UserType.MENTEE) {
+  //         menteeAvailabilityDb[userId].push(currentEvent);
+  //       }
+  //     } else if (event.start?.date) {
+  //       // full day
+  //       const start = new Date(event.start.date);
+  //       const end = new Date(event.end.date);
+
+  //       const currentEvent: CalendarEvent = new CalendarEvent(true, start, end);
+
+  //       if (userType === UserType.MENTOR) {
+  //         mentorAvailabilityDb[userId].push(currentEvent);
+  //       } else if (userType === UserType.MENTEE) {
+  //         menteeAvailabilityDb[userId].push(currentEvent);
+  //       }
+  //     }
+  //   });
+  // }
 }

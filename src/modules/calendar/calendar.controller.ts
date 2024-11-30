@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Controller, Get, Query, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { Public } from 'src/decorators/public.decorator';
-import { UserType } from 'src/interfaces/users';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { CalendarSyncService } from './calendar-sync.service';
 
@@ -9,16 +8,16 @@ import { CalendarSyncService } from './calendar-sync.service';
 export class CalendarController {
   constructor(private readonly calendarSyncService: CalendarSyncService) {}
 
-  @Post('sync')
-  async syncCalendar(
-    @Body() body: { token: string; userType: UserType; userId: string },
-  ) {
-    return this.calendarSyncService.syncCalendar(
-      body.token,
-      body.userType,
-      body.userId,
-    );
-  }
+  // @Post('sync')
+  // async syncCalendar(
+  //   @Body() body: { token: string; userType: UserType; userId: string },
+  // ) {
+  //   return this.calendarSyncService.syncCalendar(
+  //     body.token,
+  //     body.userType,
+  //     body.userId,
+  //   );
+  // }
 
   @Get('start-google-oauth')
   async startGoogleOAuth(@Req() req: Request) {
