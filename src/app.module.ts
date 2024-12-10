@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { DiscoveryModule } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatController } from './controllers/chat.controller';
@@ -27,6 +28,7 @@ import { MeetingRecommendationService } from './services/meeting-recommendation.
     UserModule,
     CalendarModule,
     AuthModule,
+    DiscoveryModule,
   ],
   controllers: [ChatController, MeetingController],
   providers: [AIService, MeetingRecommendationService],
