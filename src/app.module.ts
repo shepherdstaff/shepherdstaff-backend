@@ -17,7 +17,7 @@ import { MeetingRecommendationService } from './services/meeting-recommendation.
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1',
+      password: 'ORBITALorbital2024!',
       database: 'shepherdstaff',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,

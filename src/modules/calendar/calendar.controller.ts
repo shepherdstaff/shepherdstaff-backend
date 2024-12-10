@@ -6,7 +6,7 @@ import { CalendarSyncService } from './calendar-sync.service';
 
 @Controller('api/calendar')
 export class CalendarController {
-  constructor(private readonly calendarSyncService: CalendarSyncService) {}
+  constructor(private readonly calendSyncService: CalendarSyncService) {}
 
   // @Post('sync')
   // async syncCalendar(
