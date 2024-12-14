@@ -4,6 +4,8 @@ import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
 import { DateTime } from 'luxon';
 import { UserPayload } from '../auth/interfaces/user-payload';
+import { ScheduleService } from './schedule.service';
+import { EventEntity } from './entities/event.entity';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -81,4 +83,27 @@ export class CalendarSyncService {
 
     return userCalendarEvents;
   }
+
+//   /**
+//    *  Finds the available timeslots from an array of CalendarEvents
+//    *  based on the required duration of the meeting.
+//    *
+//    *  @params number The duration of the meeting
+//    */
+//     async findAvailableTimeslots(duration: number) {
+//       // Get sorted list of busy timeslots
+//       const busyEvents = await this.googleOAuthCallback();
+//
+//       // Map the events to CalendarEvent format
+//       const busyCalendarEvents: CalendarEvent[] = busyEvents.map(event => ({
+//         startDateTime: new Date(event.start.dateTime || event.start.date),
+//         endDateTime: new Date(event.end.dateTime || event.end.date),
+//         hasTimings: !!event.start.dateTime,
+//       }));
+//
+//       // Call the method from ScheduleService
+//       const freeSlot = this.scheduleService.findFreeSlotFromListOfBusyTimeslots(busyCalendarEvents);
+//
+//       return freeSlot ? `Free slot available from ${freeSlot.start} to ${freeSlot.end}` : 'No free slot available';
+//     }
 }
