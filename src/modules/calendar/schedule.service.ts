@@ -1,16 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { CalendarEvent } from './interfaces/calendar-event.domain';
 import { FreeSlot } from './interfaces/free-slot.domain';
-import { ScheduleRepository } from './repositories/schedule.repository'
+import { ScheduleRepository } from './repositories/schedule.repository';
 
 @Injectable()
 export class ScheduleService {
-
   constructor(private scheduleRepository: ScheduleRepository) {}
 
-  public findFreeSlotFromListOfBusyTimeslots(events: CalendarEvent[]): { start: Date; end: Date }[] {
+  public findFreeSlotFromListOfBusyTimeslots(
+    events: CalendarEvent[],
+  ): { start: Date; end: Date }[] {
     // Sort events by their start times
-    events.sort((a, b) => a.startDateTime.getTime() - b.startDateTime.getTime());
+    events.sort(
+      (a, b) => a.startDateTime.getTime() - b.startDateTime.getTime(),
+    );
 
     // Merge overlapping or contiguous busy timeslots
     const mergedEvents: CalendarEvent[] = [];
@@ -23,7 +26,12 @@ export class ScheduleService {
 
         if (event.startDateTime <= lastMergedEvent.endDateTime) {
           // Merge overlapping events by extending the end time
-          lastMergedEvent.endDateTime = new Date(Math.max(lastMergedEvent.endDateTime.getTime(), event.endDateTime.getTime()));
+          lastMergedEvent.endDateTime = new Date(
+            Math.max(
+              lastMergedEvent.endDateTime.getTime(),
+              event.endDateTime.getTime(),
+            ),
+          );
         } else {
           // No overlap: add the event to the list
           mergedEvents.push(event);
@@ -51,7 +59,10 @@ export class ScheduleService {
     return freeSlots;
   }
 
-  public async storeCalendarEvents(calendarEvent: CalendarEvent[], userId: string) {
+  public async storeCalendarEvents(
+    calendarEvent: CalendarEvent[],
+    userId: string,
+  ) {
     await this.scheduleRepository.saveCalendarEvents(calendarEvent, userId);
   }
 }
