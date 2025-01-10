@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PreferenceModule } from '../preferences/preference.module';
 import { MenteeController } from './controllers/mentee.controller';
 import { MentorController } from './controllers/mentor.controller';
 import { NoteController } from './controllers/note.controller';
@@ -13,6 +14,7 @@ import { UserService } from './services/user.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, UserRelationEntity, UserAuthEntity]),
+    PreferenceModule,
   ],
   controllers: [NoteController, MenteeController, MentorController],
   providers: [NoteService, UserService, UsersRepository],

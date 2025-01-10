@@ -1,5 +1,6 @@
 // services/mentee.service.ts
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { PreferenceService } from 'src/modules/preferences/preference.service';
 import { menteeDb, mentorToMenteeMapDb } from '../../../hacked-database';
 import { Mentee } from '../domain/mentee';
 import { Mentor } from '../domain/mentor';
@@ -7,7 +8,10 @@ import { UsersRepository } from '../repositories/users.repository';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject() private usersRepository: UsersRepository) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    private preferenceService: PreferenceService,
+  ) {}
 
   async attachMenteeToMentor(mentorId: string, menteeId: string) {
     // Check if mentee already exists
@@ -92,6 +96,8 @@ export class UserService {
     pass: string,
   ) {
     const newMentor = new Mentor({ name, birthdate, email });
+
+    // TODO: seed default preferences for mentor
 
     return this.usersRepository.createUser(newMentor, userName, pass);
   }

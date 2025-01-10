@@ -12,5 +12,6 @@ import { PreferenceService } from './preference.service';
   ],
   controllers: [PreferenceController],
   providers: [PreferenceService, PreferenceRepository],
+  exports: [PreferenceService],
 })
 export class PreferenceModule {}
