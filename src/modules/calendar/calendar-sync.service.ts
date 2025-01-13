@@ -4,6 +4,8 @@ import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
 import { DateTime } from 'luxon';
 import { UserPayload } from '../auth/interfaces/user-payload';
+import { GoogleCalendarEvent } from './interfaces/google-calendar-event.interface';
+import { ScheduleRepository } from './repositories/schedule.repository';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -13,7 +15,10 @@ const userGoogleTokenMap: { [userId: string]: any } = {};
 export class CalendarSyncService {
   private googleOauth2Client: Auth.OAuth2Client;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private scheduleRepository: ScheduleRepository,
+  ) {
     // Setup your API client
     this.googleOauth2Client = new google.auth.OAuth2(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -56,7 +61,7 @@ export class CalendarSyncService {
 
     // TODO: allow users to omit calendars
 
-    const userCalendarEvents = [];
+    const userCalendarEvents: GoogleCalendarEvent[] = [];
     for (const calendar of calendars) {
       const eventsResponse = await googleCalendar.events.list({
         calendarId: calendar.id,
@@ -66,7 +71,9 @@ export class CalendarSyncService {
         orderBy: 'startTime',
       });
 
-      const events = eventsResponse.data.items;
+      const events = eventsResponse.data.items.map(
+        (schemaEvent) => new GoogleCalendarEvent(schemaEvent),
+      );
       userCalendarEvents.push(...events);
     }
 
@@ -81,9 +88,12 @@ export class CalendarSyncService {
       return aComparison - bComparison;
     });
 
-    return userCalendarEvents;
+    const savedEvents = await this.scheduleRepository.saveCalendarEvents(
+      userCalendarEvents.map((gCalEvent) => gCalEvent.toCalendarEventDomain()),
+      userId,
+    );
 
-    // TODO: save userCalendarEvents into DB
+    return savedEvents;
   }
 
   // TODO: Cron job to sync calendar of mentors

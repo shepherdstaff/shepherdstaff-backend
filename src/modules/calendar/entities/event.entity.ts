@@ -1,29 +1,54 @@
 import { UserEntity } from 'src/modules/users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { CalendarEvent } from '../interfaces/calendar-event.domain';
 
 @Entity({
   name: 'event',
 })
 export class EventEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  constructor(props?: Partial<EventEntity>) {
+    if (props) Object.assign(this, props);
+  }
 
-    @Column()
-    name: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    startDateTime: Date;
+  @Column()
+  // The ID assigned by the calendar source (i.e. Google cal or Apple cal)
+  sourceId: string;
 
-    @Column()
-    endDateTime: Date;
+  @Column()
+  name: string;
 
-    @Column()
-    hasTimings: boolean;
+  @Column()
+  startDateTime: Date;
 
-    @ManyToOne(
-        () => UserEntity, 
-        (user) => user.id,           //reverse relation
-    )
-    @JoinColumn({ name: 'fk_user_id' })
-    user: UserEntity;
+  @Column()
+  endDateTime: Date;
+
+  @Column()
+  hasTimings: boolean;
+
+  @ManyToOne(
+    () => UserEntity,
+    (user) => user.id, //reverse relation
+  )
+  @JoinColumn({ name: 'fk_user_id' })
+  user: UserEntity;
+
+  static from(calendarEvent: CalendarEvent): EventEntity {
+    return new EventEntity({
+      sourceId: calendarEvent.id, // Assuming you want to keep the same ID if provided
+      name: calendarEvent.name,
+      startDateTime: calendarEvent.startDateTime,
+      endDateTime: calendarEvent.endDateTime,
+      hasTimings: calendarEvent.hasTimings,
+    });
+  }
 }

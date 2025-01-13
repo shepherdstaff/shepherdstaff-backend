@@ -6,7 +6,7 @@ import {
   mentorToMenteeMapDb,
 } from 'src/hacked-database';
 import { AppointmentStatus } from 'src/interfaces/appointments';
-import { CalendarEvent } from 'src/interfaces/availability';
+import { CalendarEventHacked } from 'src/interfaces/availability';
 import { AIService } from './ai.service';
 
 @Injectable()
@@ -45,7 +45,7 @@ export class MeetingRecommendationService {
       endDateTime: new Date(recommendation.getTime() + 120 * 60 * 1000), // 2 hours
     };
 
-    const appointmentCalendarEvent = new CalendarEvent(
+    const appointmentCalendarEvent = new CalendarEventHacked(
       false,
       recommendation,
       new Date(recommendation.getTime() + 120 * 60 * 1000),

@@ -1,6 +1,8 @@
 import { AppointmentStatus } from './appointments';
 
-export class CalendarEvent {
+// deprecated - name has been changed to distinguish between this old class and the new CalendarEvent class that
+// we have defined as a proper domain object
+export class CalendarEventHacked {
   isFullDay: boolean;
   startDateTime: Date;
   endDateTime: Date;

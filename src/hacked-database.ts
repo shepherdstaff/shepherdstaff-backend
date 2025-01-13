@@ -1,5 +1,5 @@
 import { Appointment } from './interfaces/appointments';
-import { CalendarEvent } from './interfaces/availability';
+import { CalendarEventHacked } from './interfaces/availability';
 import { Prayer } from './interfaces/notes';
 import {
   mockPrayerRequest1,
@@ -283,10 +283,12 @@ export const prayerDb: {
   },
 };
 
-export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
+export const mentorAvailabilityDb: {
+  [mentorId: string]: CalendarEventHacked[];
+} = {
   [mockMentorId]: mockEventsMentor.map(
     (event) =>
-      new CalendarEvent(
+      new CalendarEventHacked(
         event.isFullDay,
         new Date(event.startDateTime),
         new Date(event.endDateTime),
@@ -297,7 +299,7 @@ export const mentorAvailabilityDb: { [mentorId: string]: CalendarEvent[] } = {
 const mockEventsToCalendarEvents = (events: any[]) => {
   return events.map(
     (event) =>
-      new CalendarEvent(
+      new CalendarEventHacked(
         event.isFullDay,
         new Date(event.startDateTime),
         new Date(event.endDateTime),
@@ -305,7 +307,9 @@ const mockEventsToCalendarEvents = (events: any[]) => {
   );
 };
 
-export const menteeAvailabilityDb: { [menteeId: string]: CalendarEvent[] } = {
+export const menteeAvailabilityDb: {
+  [menteeId: string]: CalendarEventHacked[];
+} = {
   [mockMentee1Id]: mockEventsToCalendarEvents(mockEventsMentee),
   [mockMentee2Id]: mockEventsToCalendarEvents(mockEventsMentee2),
   [mockMentee3Id]: mockEventsToCalendarEvents(mockEventsMentee3),
