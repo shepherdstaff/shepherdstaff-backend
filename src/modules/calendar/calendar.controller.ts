@@ -1,4 +1,5 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, Query, Redirect, Req } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
@@ -6,7 +7,15 @@ import { CalendarSyncService } from './calendar-sync.service';
 
 @Controller('api/calendar')
 export class CalendarController {
-  constructor(private readonly calendarSyncService: CalendarSyncService) {}
+  constructor(
+    private readonly calendarSyncService: CalendarSyncService,
+    private readonly configService: ConfigService,
+  ) {
+    // TODO: need to find a way to retrieve redirect url from config and pass to decorator
+    // redirectUrlAfterCalendarSync = this.configService.get<string>(
+    //   'CALENDAR_SYNC_CALLBACK_REDIRECT_URL',
+    // );
+  }
 
   // @Post('sync')
   // async syncCalendar(
@@ -27,6 +36,7 @@ export class CalendarController {
 
   @Public()
   @Get('google-oauth-callback')
+  @Redirect('http://localhost:5173/dashboard')
   async googleOAuthCallback(
     @Query('code') code: string,
     @Query('state') state: string,

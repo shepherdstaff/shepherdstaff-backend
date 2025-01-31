@@ -96,9 +96,9 @@ export class CalendarSyncService {
     return savedEvents;
   }
 
-  // TODO: Cron job to sync calendar of mentors
-  // for each mentor ->
-  // 1. retrieve stored oauth refresh token
-  // 2. retrieve latest calendar events from google calendar api
-  // 3. deconflict - add new events, compare and remove events in DB that dont exist anymore in google cal
+  // TODO: Cron job to sync calendar of mentors WHEN it is time to recommend meeting for a mentor-mentee pair
+  // for the specified mentor and mentee -> (meeting rec service has knowledge of this)
+  // 1. retrieve stored oauth refresh token (schedule service calls calendar sync service)
+  // 2. retrieve latest calendar events from google calendar api (schedule service calls calendar sync service)
+  // 3. deconflict - add new events, compare and remove events in DB that dont exist anymore in google cal (calendar sync service does the update/decon)
 }
