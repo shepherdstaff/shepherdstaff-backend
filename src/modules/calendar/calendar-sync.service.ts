@@ -4,7 +4,9 @@ import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
 import { DateTime } from 'luxon';
 import { UserPayload } from '../auth/interfaces/user-payload';
+import { CalendarToken } from './interfaces/calendar-token.domain';
 import { GoogleCalendarEvent } from './interfaces/google-calendar-event.interface';
+import { CalendarTokenRepository } from './repositories/calendar-token.repository';
 import { ScheduleRepository } from './repositories/schedule.repository';
 
 // TODO: move to redis
@@ -18,6 +20,7 @@ export class CalendarSyncService {
   constructor(
     private configService: ConfigService,
     private scheduleRepository: ScheduleRepository,
+    private calendarTokenRepository: CalendarTokenRepository,
   ) {
     // Setup your API client
     this.googleOauth2Client = new google.auth.OAuth2(
@@ -46,7 +49,14 @@ export class CalendarSyncService {
     const { tokens } = await this.googleOauth2Client.getToken(code);
     this.googleOauth2Client.setCredentials(tokens);
 
-    // TODO: store user's refresh token in database -> for cron job sync method to use to sync calendar events
+    await this.calendarTokenRepository.saveCalendarToken(
+      new CalendarToken({
+        userId,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        expiryDate: new Date(tokens.expiry_date),
+      }),
+    );
 
     // Retrieve user's calendar events
     const googleCalendar = google.calendar({
