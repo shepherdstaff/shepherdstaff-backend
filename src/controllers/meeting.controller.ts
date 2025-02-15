@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Query } from '@nestjs/common';
-import { MeetingRecommendationService } from '../services/meeting-recommendation.service';
+import { MeetingRecommendationService } from '../services/meeting-recommendation-legacy.service';
 
 @Controller('api/meetings')
 export class MeetingController {

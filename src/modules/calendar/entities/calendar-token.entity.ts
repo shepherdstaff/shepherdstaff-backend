@@ -32,4 +32,13 @@ export class CalendarTokenEntity {
       expiryDate: calendarToken.expiryDate,
     });
   }
+
+  toCalendarToken(): CalendarToken {
+    return new CalendarToken({
+      userId: this.userId,
+      refreshToken: this.refreshToken,
+      accessToken: this.accessToken,
+      expiryDate: this.expiryDate,
+    });
+  }
 }

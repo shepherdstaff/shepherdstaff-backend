@@ -10,7 +10,7 @@ import { CalendarModule } from './modules/calendar/calendar.module';
 import { SeederModule } from './modules/seed/seeder.module';
 import { UserModule } from './modules/users/user.module';
 import { AIService } from './services/ai.service';
-import { MeetingRecommendationService } from './services/meeting-recommendation.service';
+import { MeetingRecommendationService } from './services/meeting-recommendation-legacy.service';
 
 @Module({
   imports: [

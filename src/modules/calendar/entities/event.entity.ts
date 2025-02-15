@@ -42,13 +42,14 @@ export class EventEntity {
   @JoinColumn({ name: 'fk_user_id' })
   user: UserEntity;
 
-  static from(calendarEvent: CalendarEvent): EventEntity {
+  static from(calendarEvent: CalendarEvent, userId: string): EventEntity {
     return new EventEntity({
       sourceId: calendarEvent.id, // Assuming you want to keep the same ID if provided
       name: calendarEvent.name,
       startDateTime: calendarEvent.startDateTime,
       endDateTime: calendarEvent.endDateTime,
       hasTimings: calendarEvent.hasTimings,
+      user: new UserEntity({ id: userId }),
     });
   }
 }

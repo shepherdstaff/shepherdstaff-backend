@@ -59,14 +59,52 @@ export class CalendarSyncService {
     );
 
     // Retrieve user's calendar events
+    const now = DateTime.now();
+    const limit = now.plus({ months: 1 }); // TODO: check how often mentor wants to meet mentee, then limit to that
+    const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
+
+    // Save user's calendar events to database
+    const savedEvents = await this.scheduleRepository.saveCalendarEvents(
+      userCalendarEvents.map((gCalEvent) => gCalEvent.toCalendarEventDomain()),
+      userId,
+    );
+
+    return savedEvents;
+  }
+
+  async retrieveLatestCalendarEvents(userId: string, limit: DateTime) {
+    const calendarToken = (
+      await this.calendarTokenRepository.findTokenByUserId(userId)
+    ).toCalendarToken();
+
+    this.googleOauth2Client.setCredentials({
+      access_token: calendarToken.accessToken,
+      refresh_token: calendarToken.refreshToken,
+      expiry_date: calendarToken.expiryDate.getTime(),
+    });
+
+    // Retrieve user's calendar events
+    const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
+    const userCalendarEventsDomain = userCalendarEvents.map((gCalEvent) =>
+      gCalEvent.toCalendarEventDomain(),
+    );
+
+    // Save and deconflict with existing saved calendar events in DB
+    await this.scheduleRepository.upsertCalendarEvents(
+      userCalendarEventsDomain,
+      userId,
+    );
+  }
+
+  private async fetchGoogleCalendarEvents(
+    limit: DateTime,
+  ): Promise<GoogleCalendarEvent[]> {
     const googleCalendar = google.calendar({
       version: 'v3',
       auth: this.googleOauth2Client,
     });
 
     const now = DateTime.now();
-    const limit = now.plus({ months: 1 }); // TODO: check how often mentor wants to meet mentee, then limit to that
-
     const calendars = (await googleCalendar.calendarList.list()).data.items;
 
     // TODO: allow users to omit calendars
@@ -98,17 +136,12 @@ export class CalendarSyncService {
       return aComparison - bComparison;
     });
 
-    const savedEvents = await this.scheduleRepository.saveCalendarEvents(
-      userCalendarEvents.map((gCalEvent) => gCalEvent.toCalendarEventDomain()),
-      userId,
-    );
-
-    return savedEvents;
+    return userCalendarEvents;
   }
 
   // TODO: Cron job to sync calendar of mentors WHEN it is time to recommend meeting for a mentor-mentee pair
   // for the specified mentor and mentee -> (meeting rec service has knowledge of this)
-  // 1. retrieve stored oauth refresh token (schedule service calls calendar sync service)
-  // 2. retrieve latest calendar events from google calendar api (schedule service calls calendar sync service)
-  // 3. deconflict - add new events, compare and remove events in DB that dont exist anymore in google cal (calendar sync service does the update/decon)
+  // 1. retrieve stored oauth refresh token (schedule service calls calendar sync service) DONE
+  // 2. retrieve latest calendar events from google calendar api (schedule service calls calendar sync service) DONE
+  // 3. deconflict - add new events, compare and remove events in DB that dont exist anymore in google cal (calendar sync service does the update/decon) DONE
 }

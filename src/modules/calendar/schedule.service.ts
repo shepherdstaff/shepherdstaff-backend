@@ -58,11 +58,4 @@ export class ScheduleService {
 
     return freeSlots;
   }
-
-  public async storeCalendarEvents(
-    calendarEvent: CalendarEvent[],
-    userId: string,
-  ) {
-    await this.scheduleRepository.saveCalendarEvents(calendarEvent, userId);
-  }
 }

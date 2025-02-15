@@ -6,6 +6,10 @@ import { UserRelationEntity } from './user-relation.entity';
   name: 'user',
 })
 export class UserEntity {
+  constructor(props?: Partial<UserEntity>) {
+    if (props) Object.assign(this, props);
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

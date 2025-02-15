@@ -31,10 +31,23 @@ export class ScheduleRepository {
   ) {
     // Transform CalendarEvent objects into EventEntity objects
     const eventEntities = calendarEvents.map((event) =>
-      EventEntity.from(event),
+      EventEntity.from(event, userId),
     );
 
     // Save the array of EventEntity objects to the database
     return await this.eventsRepository.save(eventEntities);
+  }
+
+  public async upsertCalendarEvents(
+    calendarEvents: CalendarEvent[],
+    userId: string,
+  ) {
+    // Transform CalendarEvent objects into EventEntity objects
+    const eventEntities = calendarEvents.map((event) =>
+      EventEntity.from(event, userId),
+    );
+
+    // Upsert based on sourceId
+    await this.eventsRepository.upsert(eventEntities, ['sourceId']);
   }
 }
