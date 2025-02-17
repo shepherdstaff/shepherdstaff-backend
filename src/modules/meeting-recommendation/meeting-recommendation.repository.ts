@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppointmentStatus } from 'src/interfaces/appointments';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationEntity } from './entities/meeting-recommendation.entity';
 
@@ -23,51 +23,86 @@ export class MeetingRecommendationRepository {
 
   async findLastCompletedMeeting(
     fromUserId: string,
-    toUserId: string,
+    toUserId?: string,
   ): Promise<MeetingRecommendation> {
     return await this.findMeetingRecommendationsByFromAndToUserId(
       fromUserId,
+      AppointmentStatus.COMPLETED,
       toUserId,
       1,
-      AppointmentStatus.COMPLETED,
     )[0];
   }
 
   async findCurrentMeetingRecommendations(
     fromUserId: string,
-    toUserId: string,
-    limit: number,
+    toUserId?: string,
+    limit?: number,
   ): Promise<MeetingRecommendation[]> {
     return await this.findMeetingRecommendationsByFromAndToUserId(
       fromUserId,
+      AppointmentStatus.PENDING,
       toUserId,
       limit,
-      AppointmentStatus.PENDING,
+    );
+  }
+
+  async completeAllPendingMeetings(): Promise<void> {
+    await this.meetingRecommendationRepository.update(
+      {
+        status: AppointmentStatus.PENDING,
+        startDateTime: LessThanOrEqual(new Date()),
+      },
+      { status: AppointmentStatus.COMPLETED },
     );
   }
 
   private async findMeetingRecommendationsByFromAndToUserId(
     fromUserId: string,
-    toUserId: string,
-    limit: number,
     status: AppointmentStatus,
+    toUserId?: string,
+    limit?: number,
   ): Promise<MeetingRecommendation[]> {
-    const entities = await this.meetingRecommendationRepository.find({
-      relations: [
-        'userRelation',
-        'userRelation.fromUser',
-        'userRelation.toUser',
-      ],
-      where: {
-        userRelation: {
-          fromUser: { id: fromUserId },
-          toUser: { id: toUserId },
+    let userWhereOptions;
+    if (toUserId) {
+      userWhereOptions = {
+        fromUser: { id: fromUserId },
+        toUser: { id: toUserId },
+      };
+    } else {
+      userWhereOptions = {
+        fromUser: { id: fromUserId },
+      };
+    }
+
+    let entities;
+    if (!limit) {
+      entities = await this.meetingRecommendationRepository.find({
+        relations: [
+          'userRelation',
+          'userRelation.fromUser',
+          'userRelation.toUser',
+        ],
+        where: {
+          userRelation: userWhereOptions,
+          status,
         },
-        status,
-      },
-      order: { startDateTime: 'DESC' }, // latest first
-      take: limit,
-    });
+        order: { startDateTime: 'DESC' }, // latest first
+      });
+    } else {
+      entities = await this.meetingRecommendationRepository.find({
+        relations: [
+          'userRelation',
+          'userRelation.fromUser',
+          'userRelation.toUser',
+        ],
+        where: {
+          userRelation: userWhereOptions,
+          status,
+        },
+        order: { startDateTime: 'DESC' }, // latest first
+        take: limit,
+      });
+    }
 
     return entities.map((entity) => entity.toMeetingRecommendation());
   }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleEnum } from '../constants/roles';
+import { Mentor } from '../domain/mentor';
 import { User } from '../domain/user';
 import { UserAuthEntity } from '../entities/user-auth.entity';
 import { UserRelationEntity } from '../entities/user-relation.entity';
@@ -83,5 +84,15 @@ export class UsersRepository {
     });
 
     return this.userRelationRepository.save(userRelation);
+  }
+
+  async findAllMentors(): Promise<Mentor[]> {
+    const mentors = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect('user.outgoingUserRelations', 'userRelation')
+      .where('userRelation.fromRole = :role', { role: RoleEnum.MENTOR })
+      .getMany();
+
+    return mentors.map((user) => user.toMentor());
   }
 }

@@ -1,4 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Mentee } from '../domain/mentee';
+import { Mentor } from '../domain/mentor';
 import { User } from '../domain/user';
 import { UserRelationEntity } from './user-relation.entity';
 
@@ -42,5 +44,23 @@ export class UserEntity {
     userEntity.birthdate = user.birthdate;
 
     return userEntity;
+  }
+
+  toMentor(): Mentor {
+    return new Mentor({
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      birthdate: this.birthdate,
+    });
+  }
+
+  toMentee(): Mentee {
+    return new Mentee({
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      birthdate: this.birthdate,
+    });
   }
 }

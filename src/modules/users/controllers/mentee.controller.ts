@@ -25,7 +25,7 @@ export class MenteeController {
     @Param('menteeId') menteeId: string, // Extract menteeId from URL
   ) {
     Logger.log('MenteeController Reached');
-    return this.userService.attachMenteeToMentor(mentorId, menteeId);
+    return this.userService.attachMenteeToMentorLegacy(mentorId, menteeId);
   }
   /*
     //Use this to test postman post request:
@@ -54,13 +54,13 @@ export class MenteeController {
   ) {
     Logger.log('Delete Mentee Controller Reached');
     this.noteService.deleteAllNotes(mentorId, menteeId);
-    return this.userService.deleteMentee(mentorId, menteeId);
+    return this.userService.deleteMenteeLegacy(mentorId, menteeId);
   }
 
   @Get('list/:mentorId')
-  async listAllMentees(@Param('mentorId') mentorId: string) {
+  async listAllMenteesLegacy(@Param('mentorId') mentorId: string) {
     Logger.log('List All Mentees Controller Reached');
-    return this.userService.getAllMentees(mentorId);
+    return this.userService.getAllMenteesLegacy(mentorId);
   }
 
   //   // Create an appointment
