@@ -72,7 +72,7 @@ export class CalendarSyncService {
     return savedEvents;
   }
 
-  async retrieveLatestCalendarEvents(userId: string, limit: DateTime) {
+  async retrieveLatestCalendarEvents(userId: string, limitToDate: DateTime) {
     const calendarToken = (
       await this.calendarTokenRepository.findTokenByUserId(userId)
     ).toCalendarToken();
@@ -84,7 +84,8 @@ export class CalendarSyncService {
     });
 
     // Retrieve user's calendar events
-    const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
+    const userCalendarEvents =
+      await this.fetchGoogleCalendarEvents(limitToDate);
     const userCalendarEventsDomain = userCalendarEvents.map((gCalEvent) =>
       gCalEvent.toCalendarEventDomain(),
     );
@@ -97,7 +98,7 @@ export class CalendarSyncService {
   }
 
   private async fetchGoogleCalendarEvents(
-    limit: DateTime,
+    limitToDate: DateTime,
   ): Promise<GoogleCalendarEvent[]> {
     const googleCalendar = google.calendar({
       version: 'v3',
@@ -114,7 +115,7 @@ export class CalendarSyncService {
       const eventsResponse = await googleCalendar.events.list({
         calendarId: calendar.id,
         timeMin: now.toISO(),
-        timeMax: limit.toISO(),
+        timeMax: limitToDate.toISO(),
         singleEvents: true,
         orderBy: 'startTime',
       });

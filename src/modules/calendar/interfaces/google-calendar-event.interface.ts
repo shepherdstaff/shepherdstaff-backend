@@ -94,7 +94,8 @@ export class GoogleCalendarEvent {
   toCalendarEventDomain(): CalendarEvent {
     return {
       name: this.summary,
-      id: this.id,
+      id: null,
+      sourceId: this.id,
       startDateTime: DateTime.fromISO(
         this.start.date || this.start.dateTime,
       ).toJSDate(),

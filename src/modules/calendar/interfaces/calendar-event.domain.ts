@@ -1,8 +1,12 @@
 export class CalendarEvent {
-    name: string;
-    id: string;
-    startDateTime: Date;
-    endDateTime: Date;
-    hasTimings: boolean;
-}
+  constructor(props: Partial<CalendarEvent>) {
+    if (props) Object.assign(this, props);
+  }
 
+  name: string;
+  id: string;
+  sourceId: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  hasTimings: boolean;
+}

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { AppointmentStatus } from 'src/interfaces/appointments';
+import { ScheduleService } from '../calendar/schedule.service';
 import { UserService } from '../users/services/user.service';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationRepository } from './meeting-recommendation.repository';
@@ -10,6 +11,7 @@ export class MeetingRecommendationService {
   constructor(
     private meetingRecommendationRepository: MeetingRecommendationRepository,
     private userService: UserService,
+    private scheduleService: ScheduleService,
   ) {}
 
   // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -56,9 +58,15 @@ export class MeetingRecommendationService {
   // TODO: Implement this method
   async recommendMeetings(mentorId: string, menteeId: string) {
     // Call schedule service to sync latest calendar events
-    // Call schedule service to get latest calendar events stored in DB
+    await this.scheduleService.syncLatestCalendarEvents(mentorId);
+    await this.scheduleService.syncLatestCalendarEvents(menteeId);
+
+    // Call schedule service to find free time slot for mentor and mentee
+
     // Find a free time slot for mentor and mentee
   }
+
+  // TODO: async rejectMeetingRecommendation -> update status to REJECTED, insert as event into calendar events DB
 
   private async retrieveLastCompletedMeeting(
     mentorId: string,

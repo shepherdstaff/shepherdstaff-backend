@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { DateTime } from 'luxon';
+import { CalendarSyncService } from './calendar-sync.service';
 import { CalendarEvent } from './interfaces/calendar-event.domain';
 import { FreeSlot } from './interfaces/free-slot.domain';
 import { ScheduleRepository } from './repositories/schedule.repository';
 
 @Injectable()
 export class ScheduleService {
-  constructor(private scheduleRepository: ScheduleRepository) {}
+  constructor(
+    private scheduleRepository: ScheduleRepository,
+    private calendarSyncService: CalendarSyncService,
+  ) {}
 
   public findFreeSlotFromListOfBusyTimeslots(
     events: CalendarEvent[],
@@ -57,5 +62,13 @@ export class ScheduleService {
     }
 
     return freeSlots;
+  }
+
+  async syncLatestCalendarEvents(userId: string): Promise<void> {
+    const limitToDate = DateTime.now().plus({ month: 1 });
+    await this.calendarSyncService.retrieveLatestCalendarEvents(
+      userId,
+      limitToDate,
+    );
   }
 }

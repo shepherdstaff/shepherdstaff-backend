@@ -44,12 +44,23 @@ export class EventEntity {
 
   static from(calendarEvent: CalendarEvent, userId: string): EventEntity {
     return new EventEntity({
-      sourceId: calendarEvent.id, // Assuming you want to keep the same ID if provided
+      sourceId: calendarEvent.sourceId, // Assuming you want to keep the same ID if provided
       name: calendarEvent.name,
       startDateTime: calendarEvent.startDateTime,
       endDateTime: calendarEvent.endDateTime,
       hasTimings: calendarEvent.hasTimings,
       user: new UserEntity({ id: userId }),
+    });
+  }
+
+  toCalendarEvent(): CalendarEvent {
+    return new CalendarEvent({
+      id: this.id,
+      sourceId: this.sourceId,
+      name: this.name,
+      startDateTime: this.startDateTime,
+      endDateTime: this.endDateTime,
+      hasTimings: this.hasTimings,
     });
   }
 }
