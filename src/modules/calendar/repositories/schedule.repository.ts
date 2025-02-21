@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DateTime } from 'luxon';
 import { Repository } from 'typeorm';
 import { EventEntity } from '../entities/event.entity';
 import { CalendarEvent } from '../interfaces/calendar-event.domain';
@@ -49,5 +50,23 @@ export class ScheduleRepository {
 
     // Upsert based on sourceId
     await this.eventsRepository.upsert(eventEntities, ['sourceId']);
+  }
+
+  public async getSavedCalendarEventsForUser(
+    userId: string,
+    limitDate: DateTime,
+  ): Promise<CalendarEvent[]> {
+    const events = await this.eventsRepository
+      .createQueryBuilder('events')
+      .where('events.user = :userId', { userId })
+      .andWhere('events.startDateTime <= :limitDate', {
+        limitDate: limitDate.toJSDate(),
+      })
+      .andWhere('events.startDateTime >= :now', {
+        now: DateTime.now().toJSDate(),
+      })
+      .getMany();
+
+    return events.map((event) => event.toCalendarEvent());
   }
 }

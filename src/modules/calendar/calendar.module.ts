@@ -21,5 +21,6 @@ import { ScheduleService } from './schedule.service';
     ScheduleRepository,
     CalendarTokenRepository,
   ],
+  exports: [ScheduleService],
 })
 export class CalendarModule {}

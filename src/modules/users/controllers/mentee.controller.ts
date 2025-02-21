@@ -57,10 +57,15 @@ export class MenteeController {
     return this.userService.deleteMenteeLegacy(mentorId, menteeId);
   }
 
-  @Get('list/:mentorId')
+  @Get('list/legacy/:mentorId')
   async listAllMenteesLegacy(@Param('mentorId') mentorId: string) {
     Logger.log('List All Mentees Controller Reached');
     return this.userService.getAllMenteesLegacy(mentorId);
+  }
+
+  @Get('list/:mentorId/')
+  async listAllMentees(@Param('mentorId') mentorId: string) {
+    return this.userService.getMenteesForMentor(mentorId);
   }
 
   //   // Create an appointment

@@ -7,6 +7,7 @@ import { ChatController } from './controllers/chat.controller';
 import { MeetingController } from './controllers/meeting.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
+import { MeetingRecommendationModule } from './modules/meeting-recommendation/meeting-recommendation.module';
 import { SeederModule } from './modules/seed/seeder.module';
 import { UserModule } from './modules/users/user.module';
 import { AIService } from './services/ai.service';
@@ -31,6 +32,7 @@ import { MeetingRecommendationService } from './services/meeting-recommendation-
     AuthModule,
     DiscoveryModule,
     SeederModule,
+    MeetingRecommendationModule,
   ],
   controllers: [ChatController, MeetingController],
   providers: [AIService, MeetingRecommendationService],

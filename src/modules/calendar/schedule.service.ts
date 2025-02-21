@@ -1,22 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { CalendarEvent } from './interfaces/calendar-event.domain';
+import { DateTime } from 'luxon';
+import { CalendarSyncService } from './calendar-sync.service';
 import { FreeSlot } from './interfaces/free-slot.domain';
+import { ScheduleSlot } from './interfaces/schedule-slot.interface';
 import { ScheduleRepository } from './repositories/schedule.repository';
 
 @Injectable()
 export class ScheduleService {
-  constructor(private scheduleRepository: ScheduleRepository) {}
+  constructor(
+    private scheduleRepository: ScheduleRepository,
+    private calendarSyncService: CalendarSyncService,
+  ) {}
 
-  public findFreeSlotFromListOfBusyTimeslots(
-    events: CalendarEvent[],
-  ): { start: Date; end: Date }[] {
+  private findFreeSlotFromListOfBusyScheduleSlots(
+    events: ScheduleSlot[],
+  ): FreeSlot[] {
     // Sort events by their start times
     events.sort(
-      (a, b) => a.startDateTime.getTime() - b.startDateTime.getTime(),
+      (a, b) =>
+        a.startDateTime.toJSDate().getTime() -
+        b.startDateTime.toJSDate().getTime(),
     );
 
     // Merge overlapping or contiguous busy timeslots
-    const mergedEvents: CalendarEvent[] = [];
+    const mergedEvents: ScheduleSlot[] = [];
 
     for (const event of events) {
       if (mergedEvents.length === 0) {
@@ -26,10 +33,12 @@ export class ScheduleService {
 
         if (event.startDateTime <= lastMergedEvent.endDateTime) {
           // Merge overlapping events by extending the end time
-          lastMergedEvent.endDateTime = new Date(
-            Math.max(
-              lastMergedEvent.endDateTime.getTime(),
-              event.endDateTime.getTime(),
+          lastMergedEvent.endDateTime = DateTime.fromJSDate(
+            new Date(
+              Math.max(
+                lastMergedEvent.endDateTime.toJSDate().getTime(),
+                event.endDateTime.toJSDate().getTime(),
+              ),
             ),
           );
         } else {
@@ -50,12 +59,52 @@ export class ScheduleService {
 
       if (prevEvent.endDateTime < currentEvent.startDateTime) {
         freeSlots.push({
-          start: new Date(prevEvent.endDateTime),
-          end: new Date(currentEvent.startDateTime),
+          startDateTime: prevEvent.endDateTime,
+          endDateTime: currentEvent.startDateTime,
         });
       }
     }
 
     return freeSlots;
+  }
+
+  async syncLatestCalendarEvents(userId: string) {
+    await this.calendarSyncService.retrieveLatestCalendarEvents(
+      userId,
+      DateTime.now(),
+    );
+  }
+
+  async findFreeSlotsInSchedule(
+    fromUserId: string,
+    toUserId: string,
+    numberOfSlotsToFind: number,
+    reservedFreeSlots: FreeSlot[],
+  ): Promise<FreeSlot[]> {
+    // Retrieve user's calendar events
+    const fromUserCalendarEvents =
+      await this.scheduleRepository.getSavedCalendarEventsForUser(
+        fromUserId,
+        DateTime.now().plus({ months: 1 }),
+      );
+
+    const toUserCalendarEvents =
+      await this.scheduleRepository.getSavedCalendarEventsForUser(
+        toUserId,
+        DateTime.now().plus({ months: 1 }),
+      );
+
+    // Merge the two users' calendar events + reserved free slots of the fromUser
+    const mergedCalendarEvents: ScheduleSlot[] = [
+      ...fromUserCalendarEvents,
+      ...toUserCalendarEvents,
+      ...reservedFreeSlots,
+    ];
+    // Find free slots between busy timeslots
+    const freeSlots =
+      this.findFreeSlotFromListOfBusyScheduleSlots(mergedCalendarEvents);
+
+    // Return the first n free slots
+    return freeSlots.slice(0, numberOfSlotsToFind);
   }
 }

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { AppointmentStatus } from 'src/interfaces/appointments';
+import { ScheduleService } from '../calendar/schedule.service';
 import { UserService } from '../users/services/user.service';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationRepository } from './meeting-recommendation.repository';
@@ -10,6 +11,7 @@ export class MeetingRecommendationService {
   constructor(
     private meetingRecommendationRepository: MeetingRecommendationRepository,
     private userService: UserService,
+    private scheduleService: ScheduleService,
   ) {}
 
   // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -38,10 +40,7 @@ export class MeetingRecommendationService {
           // No meeting has happened yet
           await this.recommendMeetings(mentor.id, mentee.id);
         } else {
-          const lastMeetingDateTime = DateTime.fromJSDate(
-            lastCompletedMeeting.endDateTime,
-          );
-
+          const lastMeetingDateTime = lastCompletedMeeting.endDateTime;
           // TODO: compare with user preferences for mentee meeting frequency
           // for now - hardcoded to 1 month frequency
           const nextMeetingDateTime = lastMeetingDateTime.plus({ months: 1 });
@@ -56,8 +55,46 @@ export class MeetingRecommendationService {
   // TODO: Implement this method
   async recommendMeetings(mentorId: string, menteeId: string) {
     // Call schedule service to sync latest calendar events
-    // Call schedule service to get latest calendar events stored in DB
+    await this.scheduleService.syncLatestCalendarEvents(mentorId);
+    await this.scheduleService.syncLatestCalendarEvents(menteeId);
+
+    // Get existing open meeting recommendation slots of mentor
+    const existingOpenMeetingRecommendations =
+      await this.meetingRecommendationRepository.findCurrentMeetingRecommendations(
+        mentorId,
+      );
+    const reservedFreeSlots = existingOpenMeetingRecommendations.map(
+      (meetingRecommendation) => ({
+        startDateTime: meetingRecommendation.startDateTime,
+        endDateTime: meetingRecommendation.endDateTime,
+      }),
+    );
+
     // Find a free time slot for mentor and mentee
+    const recommendedFreeSlots =
+      await this.scheduleService.findFreeSlotsInSchedule(
+        mentorId,
+        menteeId,
+        1, // TODO: Hardcoded to find 1 free slot for now, should check for user preferences
+        reservedFreeSlots,
+      );
+
+    // Store recommended meetings in database, to prevent clashing recommendations for other mentees
+    const newMeetingRecommendations = recommendedFreeSlots.map((freeSlot) => {
+      return new MeetingRecommendation({
+        fromUserId: mentorId,
+        toUserId: menteeId,
+        startDateTime: freeSlot.startDateTime,
+        endDateTime: freeSlot.endDateTime,
+        status: AppointmentStatus.PENDING,
+      });
+    });
+    await this.meetingRecommendationRepository.saveMeetingRecommendations(
+      newMeetingRecommendations,
+    );
+
+    // TODO: Notify mentor about recommended free slots
+    Logger.debug(recommendedFreeSlots);
   }
 
   private async retrieveLastCompletedMeeting(
@@ -74,28 +111,30 @@ export class MeetingRecommendationService {
     meetingRecommendation: MeetingRecommendation,
     status: AppointmentStatus,
   ) {
-    await this.meetingRecommendationRepository.saveMeetingRecommendation({
-      ...meetingRecommendation,
-      status,
-    });
+    await this.meetingRecommendationRepository.saveMeetingRecommendations([
+      {
+        ...meetingRecommendation,
+        status,
+      },
+    ]);
   }
 
-  async createMeetingRecommendation(
-    fromUserId: string,
-    toUserId: string,
-    startDateTime: DateTime,
-    endDateTime: DateTime,
-  ): Promise<MeetingRecommendation> {
-    const meetingRecommendation = new MeetingRecommendation({
-      fromUserId,
-      toUserId,
-      startDateTime: startDateTime.toJSDate(),
-      endDateTime: endDateTime.toJSDate(),
-      status: AppointmentStatus.PENDING,
-    });
+  // async createMeetingRecommendation(
+  //   fromUserId: string,
+  //   toUserId: string,
+  //   startDateTime: DateTime,
+  //   endDateTime: DateTime,
+  // ): Promise<MeetingRecommendation> {
+  //   const meetingRecommendation = new MeetingRecommendation({
+  //     fromUserId,
+  //     toUserId,
+  //     startDateTime: startDateTime.toJSDate(),
+  //     endDateTime: endDateTime.toJSDate(),
+  //     status: AppointmentStatus.PENDING,
+  //   });
 
-    return this.meetingRecommendationRepository.saveMeetingRecommendation(
-      meetingRecommendation,
-    );
-  }
+  //   return this.meetingRecommendationRepository.saveMeetingRecommendations([
+  //     meetingRecommendation,
+  //   ])[0];
+  // }
 }

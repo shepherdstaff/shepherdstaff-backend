@@ -94,13 +94,10 @@ export class GoogleCalendarEvent {
   toCalendarEventDomain(): CalendarEvent {
     return {
       name: this.summary,
-      id: this.id,
-      startDateTime: DateTime.fromISO(
-        this.start.date || this.start.dateTime,
-      ).toJSDate(),
-      endDateTime: DateTime.fromISO(
-        this.end.date || this.end.dateTime,
-      ).toJSDate(),
+      sourceId: this.id,
+      id: undefined,
+      startDateTime: DateTime.fromISO(this.start.date || this.start.dateTime),
+      endDateTime: DateTime.fromISO(this.end.date || this.end.dateTime),
       hasTimings: !this.start.date,
     };
   }

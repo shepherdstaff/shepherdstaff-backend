@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
@@ -73,9 +73,18 @@ export class CalendarSyncService {
   }
 
   async retrieveLatestCalendarEvents(userId: string, limit: DateTime) {
-    const calendarToken = (
-      await this.calendarTokenRepository.findTokenByUserId(userId)
-    ).toCalendarToken();
+    let calendarToken: CalendarToken;
+    try {
+      calendarToken = (
+        await this.calendarTokenRepository.findTokenByUserId(userId)
+      ).toCalendarToken();
+    } catch (error) {
+      // Could not find user's calendar token - user possibly has not initiated calendar sync yet
+      Logger.error(
+        `User ${userId} does not have a calendar token saved, calendar sync not initiated yet.`,
+      );
+      return;
+    }
 
     this.googleOauth2Client.setCredentials({
       access_token: calendarToken.accessToken,
@@ -138,10 +147,4 @@ export class CalendarSyncService {
 
     return userCalendarEvents;
   }
-
-  // TODO: Cron job to sync calendar of mentors WHEN it is time to recommend meeting for a mentor-mentee pair
-  // for the specified mentor and mentee -> (meeting rec service has knowledge of this)
-  // 1. retrieve stored oauth refresh token (schedule service calls calendar sync service) DONE
-  // 2. retrieve latest calendar events from google calendar api (schedule service calls calendar sync service) DONE
-  // 3. deconflict - add new events, compare and remove events in DB that dont exist anymore in google cal (calendar sync service does the update/decon) DONE
 }

@@ -1,8 +1,8 @@
-export class CalendarEvent {
-    name: string;
-    id: string;
-    startDateTime: Date;
-    endDateTime: Date;
-    hasTimings: boolean;
-}
+import { ScheduleSlot } from './schedule-slot.interface';
 
+export class CalendarEvent extends ScheduleSlot {
+  name: string;
+  id: string;
+  sourceId: string;
+  hasTimings: boolean;
+}

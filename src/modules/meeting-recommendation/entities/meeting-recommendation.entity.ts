@@ -44,8 +44,8 @@ export class MeetingRecommendationEntity {
 
     return new MeetingRecommendationEntity({
       userRelation,
-      startDateTime: meetingRecommendation.startDateTime,
-      endDateTime: meetingRecommendation.endDateTime,
+      startDateTime: meetingRecommendation.startDateTime.toJSDate(),
+      endDateTime: meetingRecommendation.endDateTime.toJSDate(),
       status: meetingRecommendation.status,
     });
   }

@@ -16,7 +16,7 @@ export class CalendarTokenRepository {
   }
 
   async findTokenByUserId(userId: string): Promise<CalendarTokenEntity> {
-    return this.calendarTokenRepository.findOne({
+    return this.calendarTokenRepository.findOneOrFail({
       where: { userId },
     });
   }
