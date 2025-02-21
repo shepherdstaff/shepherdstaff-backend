@@ -52,7 +52,6 @@ export class MeetingRecommendationService {
     }
   }
 
-  // TODO: Implement this method
   async recommendMeetings(mentorId: string, menteeId: string) {
     // Call schedule service to sync latest calendar events
     await this.scheduleService.syncLatestCalendarEvents(mentorId);
@@ -80,6 +79,7 @@ export class MeetingRecommendationService {
       );
 
     // Store recommended meetings in database, to prevent clashing recommendations for other mentees
+    // TODO!!: fetch user relation and retrieve user relation id for saving meeting recommendation
     const newMeetingRecommendations = recommendedFreeSlots.map((freeSlot) => {
       return new MeetingRecommendation({
         fromUserId: mentorId,

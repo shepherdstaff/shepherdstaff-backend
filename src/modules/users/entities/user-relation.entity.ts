@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import { UserEntity } from './user.entity';
 @Entity({
   name: 'user_relation',
 })
+@Index(['fromUser', 'toUser'], { unique: true })
 export class UserRelationEntity {
   constructor(props?: Partial<UserRelationEntity>) {
     if (props) Object.assign(this, props);
