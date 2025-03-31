@@ -79,7 +79,12 @@ export class MeetingRecommendationService {
       );
 
     // Store recommended meetings in database, to prevent clashing recommendations for other mentees
-    // TODO!!: fetch user relation and retrieve user relation id for saving meeting recommendation
+    const userRelation = await this.userService.getUserRelation(
+      mentorId,
+      menteeId,
+    );
+    const userRelationId = userRelation.id;
+
     const newMeetingRecommendations = recommendedFreeSlots.map((freeSlot) => {
       return new MeetingRecommendation({
         fromUserId: mentorId,
@@ -90,6 +95,7 @@ export class MeetingRecommendationService {
       });
     });
     await this.meetingRecommendationRepository.saveMeetingRecommendations(
+      userRelationId,
       newMeetingRecommendations,
     );
 
@@ -108,33 +114,24 @@ export class MeetingRecommendationService {
   }
 
   async updateMeetingRecommendation(
+    fromUserId: string,
+    toUserId: string,
     meetingRecommendation: MeetingRecommendation,
     status: AppointmentStatus,
   ) {
-    await this.meetingRecommendationRepository.saveMeetingRecommendations([
-      {
-        ...meetingRecommendation,
-        status,
-      },
-    ]);
+    const userRelation = await this.userService.getUserRelation(
+      fromUserId,
+      toUserId,
+    );
+
+    await this.meetingRecommendationRepository.saveMeetingRecommendations(
+      userRelation.id,
+      [
+        {
+          ...meetingRecommendation,
+          status,
+        },
+      ],
+    );
   }
-
-  // async createMeetingRecommendation(
-  //   fromUserId: string,
-  //   toUserId: string,
-  //   startDateTime: DateTime,
-  //   endDateTime: DateTime,
-  // ): Promise<MeetingRecommendation> {
-  //   const meetingRecommendation = new MeetingRecommendation({
-  //     fromUserId,
-  //     toUserId,
-  //     startDateTime: startDateTime.toJSDate(),
-  //     endDateTime: endDateTime.toJSDate(),
-  //     status: AppointmentStatus.PENDING,
-  //   });
-
-  //   return this.meetingRecommendationRepository.saveMeetingRecommendations([
-  //     meetingRecommendation,
-  //   ])[0];
-  // }
 }

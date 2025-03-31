@@ -86,10 +86,11 @@ export class CalendarSyncService {
       return;
     }
 
+    const latestToken = await this.refreshAccessToken(calendarToken);
     this.googleOauth2Client.setCredentials({
-      access_token: calendarToken.accessToken,
-      refresh_token: calendarToken.refreshToken,
-      expiry_date: calendarToken.expiryDate.getTime(),
+      access_token: latestToken.accessToken,
+      refresh_token: latestToken.refreshToken,
+      expiry_date: latestToken.expiryDate.getTime(),
     });
 
     // Retrieve user's calendar events
@@ -103,6 +104,26 @@ export class CalendarSyncService {
       userCalendarEventsDomain,
       userId,
     );
+  }
+
+  private async refreshAccessToken(calendarToken: CalendarToken) {
+    const now = DateTime.now().toJSDate();
+    if (calendarToken.expiryDate > now) {
+      return calendarToken;
+    }
+
+    this.googleOauth2Client.setCredentials({
+      refresh_token: calendarToken.refreshToken,
+    });
+
+    const { credentials } = await this.googleOauth2Client.refreshAccessToken();
+    calendarToken.accessToken = credentials.access_token;
+    calendarToken.refreshToken =
+      credentials.refresh_token ?? calendarToken.refreshToken;
+    calendarToken.expiryDate = new Date(credentials.expiry_date);
+
+    await this.calendarTokenRepository.saveCalendarToken(calendarToken);
+    return calendarToken;
   }
 
   private async fetchGoogleCalendarEvents(

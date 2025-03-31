@@ -122,4 +122,8 @@ export class UserService {
       relation.toUser.toMentee(),
     );
   }
+
+  async getUserRelation(fromUserId: string, toUserId: string) {
+    return this.usersRepository.getUserRelation(fromUserId, toUserId);
+  }
 }

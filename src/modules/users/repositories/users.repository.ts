@@ -91,4 +91,16 @@ export class UsersRepository {
 
     return mentors.map((user) => user.toMentor());
   }
+
+  async getUserRelation(
+    fromUserId: string,
+    toUserId: string,
+  ): Promise<UserRelationEntity> {
+    return this.userRelationRepository.findOne({
+      where: {
+        fromUser: { id: fromUserId },
+        toUser: { id: toUserId },
+      },
+    });
+  }
 }

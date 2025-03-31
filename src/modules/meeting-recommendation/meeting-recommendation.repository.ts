@@ -13,11 +13,12 @@ export class MeetingRecommendationRepository {
   ) {}
 
   async saveMeetingRecommendations(
+    userRelationId: string,
     meetingRecommendations: MeetingRecommendation[],
   ): Promise<MeetingRecommendation[]> {
     await this.meetingRecommendationRepository.save(
       meetingRecommendations.map((meetingRecommendation) =>
-        MeetingRecommendationEntity.from(meetingRecommendation),
+        MeetingRecommendationEntity.from(userRelationId, meetingRecommendation),
       ),
     );
     return meetingRecommendations;
