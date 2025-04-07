@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import * as webPush from 'web-push';
 import { ConfigService } from '@nestjs/config';
+import { NotificationRepository } from './notification.repository';
+import { getMessaging } from 'firebase-admin/messaging';
 
 interface NotificationSubscription {
   endpoints: string;
-  expirationTime: number |  null;
+  expirationTime: number | null;
   keysZ: { p256h: string; auth: string };
 }
 
 interface TopicSubscription {
-  [topic:string]: NotificationSubscription[];
+  [topic: string]: NotificationSubscription[];
 }
 
 @Injectable()
@@ -17,37 +18,39 @@ export class NotificationService {
   private topics: TopicSubscription = {};
 
   constructor(
-    private configService: ConfigService
-  ) {
-    // Setup your Push client
-    webPush.setVapidDetails(
-      'exmaple@email.com',
-      this.configService.get<string>("VAPID_PUBLIC_KEY"),
-      this.configService.get<string>("VAPID_PRIVATE_KEY"),
-    );
+    private configService: ConfigService,
+    private notificationRepo: NotificationRepository,
+  ) {}
+
+  async sendNotification(userId: string, message: string) {
+    // Fetch notification tokens from DB
+    const notificationClients =
+      await this.notificationRepo.getNotificationClients(userId);
+    const tokens = notificationClients.map((client) => client.token);
+
+    // Build message payload
+    const payload = {
+      data: {
+        message,
+      },
+      tokens,
+    };
+
+    // Fire notification to user devices using tokens
+    getMessaging()
+      .sendEachForMulticast(payload)
+      .then((response) => {
+        console.log('Successfully sent notification message:', response);
+      });
   }
 
-  saveSubscription(topic: string, subscription: NotificationSubscription) {
-    if (!this.topics[topic]) {
-      this.topics[topic] = [];
-    }
-    this.topics[topic].push(subscription);
-  }
-
-  async sendNotification(topic: string, title: string, body: string) {
-    if (!this.topics[topic]) {
-      console.log(`No subscribers for topic: ${topic}`);
-      return;
-    }
-    
-    const payload = JSON.stringify({ title, body });
-
-    await Promise.all(
-      this.topics[topic].map((sub) =>
-        webPush.sendNotification(sub, payload).catch((error) => {
-          console.error('Error sending notification:', error);
-        }),
-      ),
+  async registerClient(
+    userId: string,
+    registrationToken: string,
+  ): Promise<void> {
+    await this.notificationRepo.saveNotificationClient(
+      userId,
+      registrationToken,
     );
   }
 }
