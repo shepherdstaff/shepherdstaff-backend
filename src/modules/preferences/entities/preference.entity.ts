@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Preferences } from '../domain/preferences';
-import { PreferencesFieldType } from '../enums/preferences-field-types.enum';
 import { PreferencesFieldEntity } from './preferences-field.entity';
 
 @Entity({ name: 'preferences' })
@@ -36,10 +35,7 @@ export class PreferencesEntity {
   toPreferences(): Preferences {
     return new Preferences({
       fields: this.preferencesFields.reduce((acc, field) => {
-        acc[field.name] =
-          field.type === PreferencesFieldType.BOOLEAN
-            ? field.valBool
-            : field.valEnum;
+        acc[field.name] = field.toDomainValue();
         return acc;
       }, {}),
     });

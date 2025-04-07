@@ -40,4 +40,18 @@ export class PreferencesFieldEntity {
 
   @Column({ nullable: true })
   valInt: number;
+
+  toDomainValue(): string | boolean | number {
+    if (this.type === PreferencesFieldType.BOOLEAN) {
+      return this.valBool;
+    } else if (this.type === PreferencesFieldType.ENUM) {
+      return this.valEnum;
+    } else if (this.type === PreferencesFieldType.INTEGER) {
+      return this.valInt;
+    } else {
+      throw new Error(
+        `Unsupported type: ${this.type}. Only BOOLEAN, ENUM, and INT are supported.`,
+      );
+    }
+  }
 }
