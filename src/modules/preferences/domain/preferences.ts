@@ -5,7 +5,5 @@ export class Preferences {
     if (props) Object.assign(this, props);
   }
 
-  fields: {
-    [preferencesFieldName: PreferenceFieldName]: string | boolean | number;
-  };
+  fields: Partial<Record<PreferenceFieldName, string | boolean | number>>;
 }
