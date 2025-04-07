@@ -97,8 +97,6 @@ export class UserService {
   ) {
     const newMentor = new Mentor({ name, birthdate, email });
 
-    // TODO: seed default preferences for mentor
-
     return (
       await this.usersRepository.createUser(newMentor, userName, pass)
     ).toMentor();

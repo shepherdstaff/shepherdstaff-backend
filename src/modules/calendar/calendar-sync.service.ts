@@ -8,6 +8,7 @@ import { CalendarToken } from './interfaces/calendar-token.domain';
 import { GoogleCalendarEvent } from './interfaces/google-calendar-event.interface';
 import { CalendarTokenRepository } from './repositories/calendar-token.repository';
 import { ScheduleRepository } from './repositories/schedule.repository';
+import { PreferenceService } from '../preferences/preference.service';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -21,6 +22,7 @@ export class CalendarSyncService {
     private configService: ConfigService,
     private scheduleRepository: ScheduleRepository,
     private calendarTokenRepository: CalendarTokenRepository,
+    private preferenceService: PreferenceService,
   ) {
     // Setup your API client
     this.googleOauth2Client = new google.auth.OAuth2(

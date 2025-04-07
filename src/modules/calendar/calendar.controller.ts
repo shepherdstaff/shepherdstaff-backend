@@ -35,6 +35,7 @@ export class CalendarController {
 
   @Public()
   @Get('google-oauth-callback')
+  // TODO: need to find a way to retrieve redirect url from config and pass to decorator
   @Redirect('http://localhost:5173/dashboard')
   async googleOAuthCallback(
     @Query('code') code: string,
