@@ -1,9 +1,17 @@
 import { DiscoveryService, NestFactory } from '@nestjs/core';
 import { ApiBearerAuth, DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { initializeApp, ServiceAccount } from 'firebase-admin/app';
+import admin from 'firebase-admin';
+import serviceAccount from '../firebase-service-acc-key.json';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Initialize Firebase Admin SDK
+  initializeApp({
+    credential: admin.credential.cert(serviceAccount as ServiceAccount),
+  });
 
   const makeDocument = () => {
     const discoveryService = app.get(DiscoveryService);
