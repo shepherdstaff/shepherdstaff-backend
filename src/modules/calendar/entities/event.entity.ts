@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import {
   Column,
@@ -19,7 +20,7 @@ export class EventEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   // The ID assigned by the calendar source (i.e. Google cal or Apple cal)
   sourceId: string;
 
@@ -44,23 +45,24 @@ export class EventEntity {
 
   static from(calendarEvent: CalendarEvent, userId: string): EventEntity {
     return new EventEntity({
+      id: calendarEvent.id,
       sourceId: calendarEvent.sourceId, // Assuming you want to keep the same ID if provided
       name: calendarEvent.name,
-      startDateTime: calendarEvent.startDateTime,
-      endDateTime: calendarEvent.endDateTime,
+      startDateTime: calendarEvent.startDateTime.toJSDate(),
+      endDateTime: calendarEvent.endDateTime.toJSDate(),
       hasTimings: calendarEvent.hasTimings,
       user: new UserEntity({ id: userId }),
     });
   }
 
   toCalendarEvent(): CalendarEvent {
-    return new CalendarEvent({
-      id: this.id,
+    return {
       sourceId: this.sourceId,
+      id: this.id,
       name: this.name,
-      startDateTime: this.startDateTime,
-      endDateTime: this.endDateTime,
+      startDateTime: DateTime.fromJSDate(this.startDateTime),
+      endDateTime: DateTime.fromJSDate(this.endDateTime),
       hasTimings: this.hasTimings,
-    });
+    };
   }
 }

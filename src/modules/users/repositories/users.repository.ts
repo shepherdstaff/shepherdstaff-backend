@@ -68,10 +68,6 @@ export class UsersRepository {
     return mentorEntity;
   }
 
-  // async findUserMentees(id: string): Promise<UserEntity[]> {}
-
-  // async findUserMentors(id: string): Promise<UserEntity[]> {}
-
   async setMenteeForMentorUser(mentorId: string, menteeId: string) {
     const mentor = await this.userRepository.findOneBy({ id: mentorId });
     const mentee = await this.userRepository.findOneBy({ id: menteeId });
@@ -94,5 +90,17 @@ export class UsersRepository {
       .getMany();
 
     return mentors.map((user) => user.toMentor());
+  }
+
+  async getUserRelation(
+    fromUserId: string,
+    toUserId: string,
+  ): Promise<UserRelationEntity> {
+    return this.userRelationRepository.findOne({
+      where: {
+        fromUser: { id: fromUserId },
+        toUser: { id: toUserId },
+      },
+    });
   }
 }

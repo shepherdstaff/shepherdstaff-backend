@@ -1,6 +1,5 @@
 import { AppointmentStatus } from 'src/interfaces/appointments';
 import { UserRelationEntity } from 'src/modules/users/entities/user-relation.entity';
-import { UserEntity } from 'src/modules/users/entities/user.entity';
 import {
   Column,
   Entity,
@@ -35,17 +34,17 @@ export class MeetingRecommendationEntity {
   status: AppointmentStatus;
 
   static from(
+    userRelationId: string,
     meetingRecommendation: MeetingRecommendation,
   ): MeetingRecommendationEntity {
     const userRelation = new UserRelationEntity({
-      fromUser: new UserEntity({ id: meetingRecommendation.fromUserId }),
-      toUser: new UserEntity({ id: meetingRecommendation.toUserId }),
+      id: userRelationId,
     });
 
     return new MeetingRecommendationEntity({
       userRelation,
-      startDateTime: meetingRecommendation.startDateTime,
-      endDateTime: meetingRecommendation.endDateTime,
+      startDateTime: meetingRecommendation.startDateTime.toJSDate(),
+      endDateTime: meetingRecommendation.endDateTime.toJSDate(),
       status: meetingRecommendation.status,
     });
   }

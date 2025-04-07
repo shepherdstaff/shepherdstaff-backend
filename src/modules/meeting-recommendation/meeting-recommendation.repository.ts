@@ -12,13 +12,16 @@ export class MeetingRecommendationRepository {
     private meetingRecommendationRepository: Repository<MeetingRecommendationEntity>,
   ) {}
 
-  async saveMeetingRecommendation(
-    meetingRecommendation: MeetingRecommendation,
-  ): Promise<MeetingRecommendation> {
+  async saveMeetingRecommendations(
+    userRelationId: string,
+    meetingRecommendations: MeetingRecommendation[],
+  ): Promise<MeetingRecommendation[]> {
     await this.meetingRecommendationRepository.save(
-      MeetingRecommendationEntity.from(meetingRecommendation),
+      meetingRecommendations.map((meetingRecommendation) =>
+        MeetingRecommendationEntity.from(userRelationId, meetingRecommendation),
+      ),
     );
-    return meetingRecommendation;
+    return meetingRecommendations;
   }
 
   async findLastCompletedMeeting(

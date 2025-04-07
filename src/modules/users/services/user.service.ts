@@ -46,7 +46,7 @@ export class UserService {
       createdMenteeEntity.id,
     );
 
-    return newMentee;
+    return createdMenteeEntity.toMentee();
   }
 
   generateNewMenteeId(): string {
@@ -99,7 +99,9 @@ export class UserService {
 
     // TODO: seed default preferences for mentor
 
-    return this.usersRepository.createUser(newMentor, userName, pass);
+    return (
+      await this.usersRepository.createUser(newMentor, userName, pass)
+    ).toMentor();
   }
 
   async getMentor(mentorId: string) {
@@ -119,5 +121,9 @@ export class UserService {
     return mentor.outgoingUserRelations.map((relation) =>
       relation.toUser.toMentee(),
     );
+  }
+
+  async getUserRelation(fromUserId: string, toUserId: string) {
+    return this.usersRepository.getUserRelation(fromUserId, toUserId);
   }
 }

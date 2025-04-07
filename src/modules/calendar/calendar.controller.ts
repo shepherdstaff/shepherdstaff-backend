@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Redirect, Req } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { DateTime } from 'luxon';
 import { Public } from 'src/decorators/public.decorator';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { CalendarSyncService } from './calendar-sync.service';
@@ -17,16 +18,14 @@ export class CalendarController {
     // );
   }
 
-  // @Post('sync')
-  // async syncCalendar(
-  //   @Body() body: { token: string; userType: UserType; userId: string },
-  // ) {
-  //   return this.calendarSyncService.syncCalendar(
-  //     body.token,
-  //     body.userType,
-  //     body.userId,
-  //   );
-  // }
+  // TODO: for testing purposes, to be removed in production
+  @Get('test-sync')
+  async testSyncCalendar(@Query('userId') userId: string) {
+    return this.calendarSyncService.retrieveLatestCalendarEvents(
+      userId,
+      DateTime.now().plus({ months: 1 }),
+    );
+  }
 
   @Get('start-google-oauth')
   async startGoogleOAuth(@Req() req: Request) {

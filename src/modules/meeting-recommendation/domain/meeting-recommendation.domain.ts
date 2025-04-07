@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { AppointmentStatus } from 'src/interfaces/appointments';
 
 export class MeetingRecommendation {
@@ -5,8 +6,8 @@ export class MeetingRecommendation {
     if (props) Object.assign(this, props);
   }
 
-  startDateTime: Date;
-  endDateTime: Date;
+  startDateTime: DateTime;
+  endDateTime: DateTime;
   fromUserId: string;
   toUserId: string;
   status: AppointmentStatus;

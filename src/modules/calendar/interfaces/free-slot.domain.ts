@@ -1,4 +1,3 @@
-export class FreeSlot {
-    start: Date;
-    end: Date;
-}
+import { ScheduleSlot } from './schedule-slot.interface';
+
+export class FreeSlot extends ScheduleSlot {}
