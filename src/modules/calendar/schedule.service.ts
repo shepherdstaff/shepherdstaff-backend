@@ -4,16 +4,21 @@ import { CalendarSyncService } from './calendar-sync.service';
 import { FreeSlot } from './interfaces/free-slot.domain';
 import { ScheduleSlot } from './interfaces/schedule-slot.interface';
 import { ScheduleRepository } from './repositories/schedule.repository';
+import { PreferenceService } from '../preferences/preference.service';
+import { PreferenceFieldName } from '../preferences/constants/preference-field-names.enum';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     private scheduleRepository: ScheduleRepository,
     private calendarSyncService: CalendarSyncService,
+    private preferenceService: PreferenceService,
   ) {}
 
   private findFreeSlotFromListOfBusyScheduleSlots(
     events: ScheduleSlot[],
+    freeSlotDuration: number,
+    numberOfSlotsToFind: number,
   ): FreeSlot[] {
     // Sort events by their start times
     events.sort(
@@ -48,20 +53,29 @@ export class ScheduleService {
       }
     }
 
-    // TODO: fetch user preferences (how many recommendations they want on each try) to determine how many free slots to present
-
     // Find free slots between merged busy timeslots
     const freeSlots: FreeSlot[] = [];
-
+    let freeSlotCount = 0;
     for (let i = 1; i < mergedEvents.length; i++) {
       const prevEvent = mergedEvents[i - 1];
       const currentEvent = mergedEvents[i];
 
-      if (prevEvent.endDateTime < currentEvent.startDateTime) {
+      const areEventsNonOverlapping =
+        prevEvent.endDateTime < currentEvent.startDateTime;
+      const isFreeSlotLongEnough =
+        currentEvent.startDateTime.diff(prevEvent.endDateTime).as('minutes') >=
+        freeSlotDuration;
+
+      if (areEventsNonOverlapping && isFreeSlotLongEnough) {
         freeSlots.push({
           startDateTime: prevEvent.endDateTime,
           endDateTime: currentEvent.startDateTime,
         });
+        freeSlotCount++;
+      }
+
+      if (freeSlotCount >= numberOfSlotsToFind) {
+        break;
       }
     }
 
@@ -100,11 +114,21 @@ export class ScheduleService {
       ...toUserCalendarEvents,
       ...reservedFreeSlots,
     ];
-    // Find free slots between busy timeslots
-    const freeSlots =
-      this.findFreeSlotFromListOfBusyScheduleSlots(mergedCalendarEvents);
 
-    // Return the first n free slots
-    return freeSlots.slice(0, numberOfSlotsToFind);
+    const preferredFreeSlotDuration =
+      (await this.preferenceService.getSpecificMenteePreferenceField(
+        fromUserId,
+        toUserId,
+        PreferenceFieldName.SCHEDULE_SLOT_LENGTH,
+      )) as number;
+
+    // Find free slots between busy timeslots
+    const freeSlots = this.findFreeSlotFromListOfBusyScheduleSlots(
+      mergedCalendarEvents,
+      preferredFreeSlotDuration,
+      numberOfSlotsToFind,
+    );
+
+    return freeSlots;
   }
 }

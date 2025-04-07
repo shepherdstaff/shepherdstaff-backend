@@ -8,11 +8,13 @@ import { EventEntity } from './entities/event.entity';
 import { CalendarTokenRepository } from './repositories/calendar-token.repository';
 import { ScheduleRepository } from './repositories/schedule.repository';
 import { ScheduleService } from './schedule.service';
+import { PreferenceModule } from '../preferences/preference.module';
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([EventEntity, CalendarTokenEntity]),
+    PreferenceModule,
   ],
   controllers: [CalendarController],
   providers: [
