@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -9,6 +10,7 @@ import { PreferencesFieldType } from '../enums/preferences-field-types.enum';
 import { PreferencesEntity } from './preference.entity';
 
 @Entity({ name: 'preferences_field' })
+@Index(['preferences', 'name'], { unique: true })
 export class PreferencesFieldEntity {
   constructor(props: Partial<PreferencesFieldEntity>) {
     if (props) Object.assign(this, props);
@@ -35,4 +37,7 @@ export class PreferencesFieldEntity {
 
   @Column({ nullable: true })
   valEnum: string;
+
+  @Column({ nullable: true })
+  valInt: number;
 }

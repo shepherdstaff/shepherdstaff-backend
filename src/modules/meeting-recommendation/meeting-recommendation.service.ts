@@ -5,6 +5,8 @@ import { ScheduleService } from '../calendar/schedule.service';
 import { UserService } from '../users/services/user.service';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationRepository } from './meeting-recommendation.repository';
+import { PreferenceService } from '../preferences/preference.service';
+import { PreferenceFieldName } from '../preferences/constants/preference-field-names.enum';
 
 @Injectable()
 export class MeetingRecommendationService {
@@ -12,6 +14,7 @@ export class MeetingRecommendationService {
     private meetingRecommendationRepository: MeetingRecommendationRepository,
     private userService: UserService,
     private scheduleService: ScheduleService,
+    private preferenceService: PreferenceService,
   ) {}
 
   // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -41,9 +44,18 @@ export class MeetingRecommendationService {
           await this.recommendMeetings(mentor.id, mentee.id);
         } else {
           const lastMeetingDateTime = lastCompletedMeeting.endDateTime;
-          // TODO: compare with user preferences for mentee meeting frequency
-          // for now - hardcoded to 1 month frequency
-          const nextMeetingDateTime = lastMeetingDateTime.plus({ months: 1 });
+
+          // compare with user preferences for mentee meeting frequency
+          const meetingFrequencyInMonths =
+            (await this.preferenceService.getSpecificMenteePreferenceField(
+              mentor.id,
+              mentee.id,
+              PreferenceFieldName.MEETING_FREQUENCY,
+            )) as number;
+
+          const nextMeetingDateTime = lastMeetingDateTime.plus({
+            months: meetingFrequencyInMonths,
+          });
           if (nextMeetingDateTime < DateTime.now()) {
             await this.recommendMeetings(mentor.id, mentee.id);
           }
@@ -70,11 +82,16 @@ export class MeetingRecommendationService {
     );
 
     // Find a free time slot for mentor and mentee
+    const preferredRecommendedSlotsAtOnce =
+      (await this.preferenceService.getSpecificGlobalPreferenceField(
+        mentorId,
+        PreferenceFieldName.RECOMMENDATIONS_AT_ONCE,
+      )) as number;
     const recommendedFreeSlots =
       await this.scheduleService.findFreeSlotsInSchedule(
         mentorId,
         menteeId,
-        1, // TODO: Hardcoded to find 1 free slot for now, should check for user preferences
+        preferredRecommendedSlotsAtOnce,
         reservedFreeSlots,
       );
 
