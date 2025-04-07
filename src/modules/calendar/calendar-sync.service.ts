@@ -94,8 +94,7 @@ export class CalendarSyncService {
     });
 
     // Retrieve user's calendar events
-    const userCalendarEvents =
-      await this.fetchGoogleCalendarEvents(limitToDate);
+    const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
     const userCalendarEventsDomain = userCalendarEvents.map((gCalEvent) =>
       gCalEvent.toCalendarEventDomain(),
     );
