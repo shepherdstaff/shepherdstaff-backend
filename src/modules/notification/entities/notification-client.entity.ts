@@ -2,6 +2,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import {
   Column,
+  Entity,
   Index,
   JoinColumn,
   ManyToOne,
@@ -9,6 +10,9 @@ import {
 } from 'typeorm';
 import { NotificationClient } from '../domain/notification-client.domain';
 
+@Entity({
+  name: 'notification_client',
+})
 export class NotificationClientEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
