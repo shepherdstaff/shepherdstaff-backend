@@ -12,6 +12,7 @@ import { SeederModule } from './modules/seed/seeder.module';
 import { UserModule } from './modules/users/user.module';
 import { AIService } from './services/ai.service';
 import { MeetingRecommendationService } from './services/meeting-recommendation-legacy.service';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MeetingRecommendationService } from './services/meeting-recommendation-
     DiscoveryModule,
     SeederModule,
     MeetingRecommendationModule,
+    NotificationModule,
   ],
   controllers: [ChatController, MeetingController],
   providers: [AIService, MeetingRecommendationService],
