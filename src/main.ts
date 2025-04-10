@@ -3,7 +3,7 @@ import { ApiBearerAuth, DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { initializeApp, ServiceAccount } from 'firebase-admin/app';
 import admin from 'firebase-admin';
-import serviceAccount from '../firebase-service-acc-key.json';
+import * as serviceAccount from '../firebase-service-acc-key.json';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
