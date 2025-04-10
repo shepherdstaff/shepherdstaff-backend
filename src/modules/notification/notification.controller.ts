@@ -3,7 +3,7 @@ import { NotificationService } from './notification.service';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { Request } from 'express';
 
-@Controller('notification')
+@Controller('api/notification')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
