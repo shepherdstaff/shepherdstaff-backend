@@ -17,6 +17,7 @@ export class NotificationClientEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column()
   token: string;
 

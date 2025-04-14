@@ -15,6 +15,15 @@ export class NotificationRepository {
     userId: string,
     registrationToken: string,
   ): Promise<void> {
+    // Check if the client already exists
+    const existingClient = await this.notificationClientRepository.findOne({
+      where: { token: registrationToken },
+    });
+
+    if (existingClient) {
+      return;
+    }
+
     await this.notificationClientRepository.save({
       user: { id: userId }, // TODO: validate that user exists
       token: registrationToken,
