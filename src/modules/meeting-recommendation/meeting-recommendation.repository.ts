@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppointmentStatus } from 'src/interfaces/appointments';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationEntity } from './entities/meeting-recommendation.entity';
 
@@ -49,6 +49,20 @@ export class MeetingRecommendationRepository {
     );
   }
 
+  async findRejectedMeetingRecommendations(
+    fromUserId: string,
+    toUserId?: string,
+    noEarlierThan?: Date,
+  ) {
+    return await this.findMeetingRecommendationsByFromAndToUserId(
+      fromUserId,
+      AppointmentStatus.REJECTED,
+      toUserId,
+      undefined,
+      noEarlierThan,
+    );
+  }
+
   async completeAllPendingMeetings(): Promise<void> {
     await this.meetingRecommendationRepository.update(
       {
@@ -64,6 +78,7 @@ export class MeetingRecommendationRepository {
     status: AppointmentStatus,
     toUserId?: string,
     limit?: number,
+    noEarlierThan?: Date,
   ): Promise<MeetingRecommendation[]> {
     let userWhereOptions;
     if (toUserId) {
@@ -88,6 +103,9 @@ export class MeetingRecommendationRepository {
         where: {
           userRelation: userWhereOptions,
           status,
+          ...(noEarlierThan && {
+            endDateTime: MoreThanOrEqual(noEarlierThan),
+          }),
         },
         order: { startDateTime: 'DESC' }, // latest first
       });
@@ -101,6 +119,9 @@ export class MeetingRecommendationRepository {
         where: {
           userRelation: userWhereOptions,
           status,
+          ...(noEarlierThan && {
+            endDateTime: MoreThanOrEqual(noEarlierThan),
+          }),
         },
         order: { startDateTime: 'DESC' }, // latest first
         take: limit,

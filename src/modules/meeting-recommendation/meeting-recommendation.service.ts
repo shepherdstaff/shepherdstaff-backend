@@ -5,6 +5,7 @@ import { ScheduleService } from '../calendar/schedule.service';
 import { UserService } from '../users/services/user.service';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationRepository } from './meeting-recommendation.repository';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class MeetingRecommendationService {
@@ -12,6 +13,7 @@ export class MeetingRecommendationService {
     private meetingRecommendationRepository: MeetingRecommendationRepository,
     private userService: UserService,
     private scheduleService: ScheduleService,
+    private notificationService: NotificationService,
   ) {}
 
   // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -62,12 +64,21 @@ export class MeetingRecommendationService {
       await this.meetingRecommendationRepository.findCurrentMeetingRecommendations(
         mentorId,
       );
-    const reservedFreeSlots = existingOpenMeetingRecommendations.map(
-      (meetingRecommendation) => ({
-        startDateTime: meetingRecommendation.startDateTime,
-        endDateTime: meetingRecommendation.endDateTime,
-      }),
-    );
+    // Deconflict rejected meeting recommendations
+    const rejectedMeetingRecommendations =
+      await this.meetingRecommendationRepository.findRejectedMeetingRecommendations(
+        mentorId,
+        menteeId,
+        DateTime.now().toJSDate(),
+      );
+
+    const reservedFreeSlots = [
+      ...existingOpenMeetingRecommendations,
+      ...rejectedMeetingRecommendations,
+    ].map((meetingRecommendation) => ({
+      startDateTime: meetingRecommendation.startDateTime,
+      endDateTime: meetingRecommendation.endDateTime,
+    }));
 
     // Find a free time slot for mentor and mentee
     const recommendedFreeSlots =
@@ -101,6 +112,13 @@ export class MeetingRecommendationService {
 
     // TODO: Notify mentor about recommended free slots
     Logger.debug(recommendedFreeSlots);
+    const message =
+      recommendedFreeSlots.length > 1
+        ? `You have new meeting recommendations with ${menteeId}`
+        : `You have a new meeting recommendation with ${menteeId} at ${recommendedFreeSlots[0].startDateTime.toFormat(
+            'yyyy-MM-dd HH:mm',
+          )}`;
+    await this.notificationService.sendNotification(mentorId, message);
   }
 
   // TODO: async rejectMeetingRecommendation -> update status to REJECTED, insert as event into calendar events DB

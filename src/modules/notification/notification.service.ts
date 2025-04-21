@@ -1,26 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { NotificationRepository } from './notification.repository';
 import { getMessaging } from 'firebase-admin/messaging';
 
-interface NotificationSubscription {
-  endpoints: string;
-  expirationTime: number | null;
-  keysZ: { p256h: string; auth: string };
-}
-
-interface TopicSubscription {
-  [topic: string]: NotificationSubscription[];
-}
-
 @Injectable()
 export class NotificationService {
-  private topics: TopicSubscription = {};
-
-  constructor(
-    private configService: ConfigService,
-    private notificationRepo: NotificationRepository,
-  ) {}
+  constructor(private notificationRepo: NotificationRepository) {}
 
   async sendNotification(userId: string, message: string) {
     // Fetch notification tokens from DB
