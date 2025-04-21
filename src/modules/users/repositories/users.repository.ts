@@ -8,6 +8,8 @@ import { UserAuthEntity } from '../entities/user-auth.entity';
 import { UserRelationEntity } from '../entities/user-relation.entity';
 import { UserEntity } from '../entities/user.entity';
 
+import { hashPassword } from 'src/utils/hash';
+
 @Injectable()
 export class UsersRepository {
   constructor(
@@ -31,7 +33,7 @@ export class UsersRepository {
     if (userName && pass) {
       const userAuthEntity = new UserAuthEntity({
         userName,
-        hash: pass,
+        hash: await hashPassword(pass),
         user: createdUserEntity,
       });
       await this.userAuthRepository.save(userAuthEntity);
@@ -45,13 +47,37 @@ export class UsersRepository {
     return this.userRepository.findOneBy({ id });
   }
 
-  async findUserByUserName(userName: string): Promise<UserAuthEntity> {
+  async findUserAuthByUserName(userName: string): Promise<UserAuthEntity> {
     const userAuthEntity = await this.userAuthRepository.findOne({
       where: { userName },
       relations: ['user'],
     });
 
     return userAuthEntity;
+  }
+
+  async findUserAuthById(id: string): Promise<UserAuthEntity> {
+    const userAuthEntity = await this.userAuthRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    return userAuthEntity;
+  }
+
+  async updateUserAuth(
+    userAuth: Partial<UserAuthEntity>,
+  ): Promise<UserAuthEntity> {
+    if (!userAuth.id) {
+      throw new Error('UserAuthEntity ID is required for update');
+    }
+    return this.userAuthRepository.save(userAuth);
+  }
+
+  async findUserAuthByRefreshToken(refreshToken: string) {
+    return await this.userAuthRepository.findOne({
+      where: { refreshToken },
+      relations: ['user'],
+    });
   }
 
   // Find user from the perspective of a mentor - populate with mentees

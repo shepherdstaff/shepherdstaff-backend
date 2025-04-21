@@ -25,4 +25,7 @@ export class UserAuthEntity {
   @OneToOne(() => UserEntity, (userEntity) => userEntity.id)
   @JoinColumn({ name: 'fk_user_id' })
   user: UserEntity;
+
+  @Column({ nullable: true })
+  refreshToken: string;
 }
