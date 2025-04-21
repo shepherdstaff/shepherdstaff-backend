@@ -3,8 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PreferenceService } from 'src/modules/preferences/preference.service';
 import { menteeDb, mentorToMenteeMapDb } from '../../../hacked-database';
 import { Mentee } from '../domain/mentee';
-import { Mentor } from '../domain/mentor';
 import { UsersRepository } from '../repositories/users.repository';
+import { UserAuthEntity } from '../entities/user-auth.entity';
+import { User } from '../domain/user';
 
 @Injectable()
 export class UserService {
@@ -88,6 +89,18 @@ export class UserService {
     }
   }
 
+  async createNewUser(
+    name: string,
+    birthdate: Date,
+    email: string,
+    userName: string,
+    pass: string,
+  ) {
+    const newUser = new User({ name, birthdate, email });
+
+    return await this.usersRepository.createUser(newUser, userName, pass);
+  }
+
   async createNewMentor(
     name: string,
     birthdate: Date,
@@ -95,12 +108,10 @@ export class UserService {
     userName: string,
     pass: string,
   ) {
-    const newMentor = new Mentor({ name, birthdate, email });
-
     // TODO: seed default preferences for mentor
 
     return (
-      await this.usersRepository.createUser(newMentor, userName, pass)
+      await this.createNewMentor(name, birthdate, email, userName, pass)
     ).toMentor();
   }
 
@@ -108,8 +119,16 @@ export class UserService {
     return this.usersRepository.findMentorById(mentorId);
   }
 
-  async getUserByUsername(userName: string) {
-    return this.usersRepository.findUserByUserName(userName);
+  async getUserAuthByUsername(userName: string) {
+    return this.usersRepository.findUserAuthByUserName(userName);
+  }
+
+  async getUserAuthById(id: string) {
+    return this.usersRepository.findUserAuthById(id);
+  }
+
+  async updateUserAuth(userAuth: Partial<UserAuthEntity>) {
+    return this.usersRepository.updateUserAuth(userAuth);
   }
 
   async getAllMentors() {
@@ -125,5 +144,9 @@ export class UserService {
 
   async getUserRelation(fromUserId: string, toUserId: string) {
     return this.usersRepository.getUserRelation(fromUserId, toUserId);
+  }
+
+  async getUserAuthByRefreshToken(refreshToken: string) {
+    return this.usersRepository.findUserAuthByRefreshToken(refreshToken);
   }
 }

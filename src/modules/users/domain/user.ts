@@ -1,6 +1,6 @@
 import { RoleEnum } from '../constants/roles';
 
-export abstract class User {
+export class User {
   id: string;
   name: string;
   email: string;
@@ -10,5 +10,7 @@ export abstract class User {
     if (props) Object.assign(this, props);
   }
 
-  abstract getRole(): RoleEnum;
+  getRole(): RoleEnum {
+    return RoleEnum.UNDEFINED;
+  }
 }
