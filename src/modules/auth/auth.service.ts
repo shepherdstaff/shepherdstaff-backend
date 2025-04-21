@@ -58,11 +58,7 @@ export class AuthService {
 
   async refreshAccessToken(refreshToken: string) {
     try {
-      const decodedToken = this.jwtService.verify(refreshToken);
-      console.log(
-        '🚀 ~ AuthService ~ refreshAccessToken ~ decodedToken:',
-        decodedToken,
-      );
+      this.jwtService.verify(refreshToken);
       const userAuth =
         await this.userService.getUserAuthByRefreshToken(refreshToken);
 
