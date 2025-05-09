@@ -111,7 +111,7 @@ export class UserService {
     // TODO: seed default preferences for mentor
 
     return (
-      await this.createNewMentor(name, birthdate, email, userName, pass)
+      await this.createNewUser(name, birthdate, email, userName, pass)
     ).toMentor();
   }
 
