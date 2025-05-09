@@ -92,7 +92,7 @@ export class MeetingRecommendationRepository {
       };
     }
 
-    let entities;
+    let entities: MeetingRecommendationEntity[];
     if (!limit) {
       entities = await this.meetingRecommendationRepository.find({
         relations: [

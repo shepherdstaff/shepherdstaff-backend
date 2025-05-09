@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MeetingRecommendation } from '../domain/meeting-recommendation.domain';
+import { DateTime } from 'luxon';
 
 @Entity({
   name: 'meeting_recommendation',
@@ -53,8 +54,8 @@ export class MeetingRecommendationEntity {
     return new MeetingRecommendation({
       fromUserId: this.userRelation.fromUser.id,
       toUserId: this.userRelation.toUser.id,
-      startDateTime: this.startDateTime,
-      endDateTime: this.endDateTime,
+      startDateTime: DateTime.fromJSDate(this.startDateTime),
+      endDateTime: DateTime.fromJSDate(this.endDateTime),
       status: this.status,
     });
   }
