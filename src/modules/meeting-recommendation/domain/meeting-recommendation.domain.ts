@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { AppointmentStatus } from 'src/interfaces/appointments';
 
 export class MeetingRecommendation {
-  constructor(props) {
+  constructor(props: Partial<MeetingRecommendation>) {
     if (props) Object.assign(this, props);
   }
 
