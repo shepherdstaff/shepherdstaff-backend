@@ -3,7 +3,6 @@ import { promisify } from 'util';
 
 export const encryptText = async (textToEncrypt: string) => {
   const iv = Buffer.from(process.env.ENCRYPTION_IV, 'hex');
-  console.log('iv', iv.toString('hex'));
   const password = process.env.ENCRYPTION_KEY;
 
   // The key length is dependent on the algorithm.
