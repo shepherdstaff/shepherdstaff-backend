@@ -31,15 +31,19 @@ export class UsersRepository {
     );
 
     if (userName && pass) {
-      const userAuthEntity = new UserAuthEntity({
-        userName,
-        hash: await hashPassword(pass),
-        user: createdUserEntity,
-      });
-      await this.userAuthRepository.save(userAuthEntity);
+      await this.createUserAuth(createdUserEntity.id, userName, pass);
     }
 
     return createdUserEntity;
+  }
+
+  async createUserAuth(userId: string, userName: string, pass: string) {
+    const userAuthEntity = new UserAuthEntity({
+      userName,
+      hash: await hashPassword(pass),
+      user: { id: userId },
+    });
+    await this.userAuthRepository.save(userAuthEntity);
   }
 
   // Only user info, no relations
@@ -84,11 +88,7 @@ export class UsersRepository {
   async findMentorById(id: string): Promise<UserEntity> {
     const mentorEntity = await this.userRepository.findOne({
       where: { id },
-      relations: {
-        outgoingUserRelations: {
-          toUser: true,
-        },
-      },
+      relations: { outgoingUserRelations: { toUser: true } },
     });
 
     return mentorEntity;
@@ -123,10 +123,7 @@ export class UsersRepository {
     toUserId: string,
   ): Promise<UserRelationEntity> {
     return this.userRelationRepository.findOne({
-      where: {
-        fromUser: { id: fromUserId },
-        toUser: { id: toUserId },
-      },
+      where: { fromUser: { id: fromUserId }, toUser: { id: toUserId } },
     });
   }
 }

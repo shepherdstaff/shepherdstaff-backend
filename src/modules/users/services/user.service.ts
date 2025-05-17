@@ -1,11 +1,13 @@
 // services/mentee.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PreferenceService } from 'src/modules/preferences/preference.service';
-import { menteeDb, mentorToMenteeMapDb } from '../../../hacked-database';
+import { menteeDb } from '../../../hacked-database';
 import { Mentee } from '../domain/mentee';
 import { UsersRepository } from '../repositories/users.repository';
 import { UserAuthEntity } from '../entities/user-auth.entity';
 import { User } from '../domain/user';
+import generator from 'generate-password';
+import { encryptText } from 'src/utils/encrypt';
 
 @Injectable()
 export class UserService {
@@ -13,22 +15,6 @@ export class UserService {
     private usersRepository: UsersRepository,
     private preferenceService: PreferenceService,
   ) {}
-
-  async attachMenteeToMentorLegacy(mentorId: string, menteeId: string) {
-    // Check if mentee already exists
-    if (mentorToMenteeMapDb[mentorId] == null) {
-      Logger.warn('MentorId not found, add a mentor first.');
-    }
-    if (mentorToMenteeMapDb[mentorId].includes(menteeId)) {
-      Logger.warn(' Mentee already exist for this Mentor.');
-    }
-
-    // Add mentee's events to the mentorToMenteeMapDb
-    mentorToMenteeMapDb[mentorId].push(menteeId);
-    Logger.log(
-      `Added new mentee to mentorToMenteeMapDb - ${mentorId} - ${menteeId}`,
-    );
-  }
 
   async createNewMentee(
     mentorId: string,
@@ -53,40 +39,6 @@ export class UserService {
   generateNewMenteeId(): string {
     const newIndex = Object.keys(menteeDb).length + 1;
     return 'mentee-' + newIndex;
-  }
-
-  deleteMenteeLegacy(mentorId: string, menteeId: string) {
-    // Check if mentee already exists
-    if (mentorToMenteeMapDb[mentorId] == null) {
-      Logger.warn('MentorId not found, add a mentor first.');
-    }
-
-    const menteeList = mentorToMenteeMapDb[mentorId];
-    const menteeIndex = menteeList.findIndex((id) => id === menteeId);
-    if (menteeIndex !== -1) {
-      menteeList.splice(menteeIndex, 1);
-    }
-    Logger.log(`Deleted mentee - ${mentorId} - ${menteeId}`);
-  }
-
-  getAllMenteesLegacy(mentorId: string) {
-    // Check if mentee already exists
-    if (mentorToMenteeMapDb[mentorId] == null) {
-      Logger.warn('MentorId not found, add a mentor first.');
-    }
-
-    const menteeList = mentorToMenteeMapDb[mentorId];
-    if (menteeList) {
-      Logger.log(`Found ${menteeList.length} mentees for mentor ${mentorId}`);
-      return { mentorId, mentees: menteeList }; // Return mentorId and mentees in JSON format
-    } else {
-      Logger.warn(`No mentees found for mentor ${mentorId}`);
-      return {
-        mentorId,
-        mentees: [],
-        message: `No mentees found for mentor ${mentorId}`,
-      }; // Empty array
-    }
   }
 
   async createNewUser(
@@ -148,5 +100,53 @@ export class UserService {
 
   async getUserAuthByRefreshToken(refreshToken: string) {
     return this.usersRepository.findUserAuthByRefreshToken(refreshToken);
+  }
+
+  async generateInviteLinkForMentee(menteeId: string) {
+    try {
+      // Verify that mentee exists
+      const mentee = (
+        await this.usersRepository.findUserById(menteeId)
+      )?.toMentee();
+
+      if (!mentee) {
+        throw new Error('Mentee does not exist');
+      }
+
+      // Verify that mentee is not already invited (i.e. no credentials)
+      const menteeAuth = await this.usersRepository.findUserAuthById(menteeId);
+      if (menteeAuth) {
+        throw new Error('Invite link already generated for this mentee');
+      }
+
+      // Generate and save credentials for mentee
+      const { userName, pass } = this.generateMenteeCredentials(mentee);
+      await this.usersRepository.createUserAuth(menteeId, userName, pass);
+
+      // Pass menteeId, credentials into invite link
+      return await this.generateMenteeInviteLink(mentee.id, userName, pass);
+    } catch (error) {
+      throw new Error(
+        'Error generating invite link for mentee: ' + error.message,
+      );
+    }
+  }
+
+  private generateMenteeCredentials(mentee: Mentee) {
+    // Generate credentials for mentee
+    const userName = mentee.email;
+    const pass = generator.generate({ length: 10, numbers: true });
+
+    return { userName, pass };
+  }
+
+  private async generateMenteeInviteLink(
+    menteeId: string,
+    username: string,
+    pass: string,
+  ) {
+    const encryptedPass = await encryptText(pass);
+
+    return `${process.env.INVITE_LINK_BASE_URL}?menteeId=${menteeId}&username=${username}&encryptedpass=${encryptedPass}`;
   }
 }

@@ -1,12 +1,13 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Query } from '@nestjs/common';
 import { MeetingRecommendationService } from './meeting-recommendation.service';
 
-@Controller('api/meeting-recommendation')
+@Controller('meeting-recommendation')
 export class MeetingRecommendationController {
   constructor(
     private readonly meetingRecommendationService: MeetingRecommendationService,
   ) {}
 
+  // For testing the recommendation logic
   @Get('recommend-meeting')
   async getRecommendedMeetingSlots(
     @Query('mentorId') mentorId: string,
@@ -15,6 +16,24 @@ export class MeetingRecommendationController {
     return this.meetingRecommendationService.recommendMeetings(
       mentorId,
       menteeId,
+    );
+  }
+
+  @Get('all')
+  async getAllOpenMeetingRecommendations(@Query('mentorId') mentorId: string) {
+    return this.meetingRecommendationService.getAllOpenMeetingRecommendations(
+      mentorId,
+    );
+  }
+
+  @Patch('decline')
+  async declineMeetingRecommendation(
+    @Query('mentorId') mentorId: string,
+    @Query('meetingRecommendationId') meetingRecommendationId: string,
+  ) {
+    return this.meetingRecommendationService.declineMeetingRecommendation(
+      mentorId,
+      meetingRecommendationId,
     );
   }
 }

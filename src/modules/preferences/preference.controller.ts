@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PreferenceService } from './preference.service';
 
-@Controller('api/preferences')
+@Controller('preferences')
 export class PreferenceController {
   constructor(private readonly preferenceService: PreferenceService) {}
 

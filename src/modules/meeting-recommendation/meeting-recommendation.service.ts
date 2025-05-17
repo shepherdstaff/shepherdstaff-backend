@@ -32,7 +32,19 @@ export class MeetingRecommendationService {
     const allMentors = await this.userService.getAllMentors();
     for (const mentor of allMentors) {
       const mentees = await this.userService.getMenteesForMentor(mentor.id);
+      const existingOpenMeetingRecommendations =
+        await this.getAllOpenMeetingRecommendations(mentor.id);
       for (const mentee of mentees) {
+        if (
+          existingOpenMeetingRecommendations.some(
+            (meetingRecommendation) =>
+              meetingRecommendation.toUserId === mentee.id,
+          )
+        ) {
+          // Skip if there is already an open meeting recommendation for this mentee
+          continue;
+        }
+
         const lastCompletedMeeting = await this.retrieveLastCompletedMeeting(
           mentor.id,
           mentee.id,
@@ -121,7 +133,37 @@ export class MeetingRecommendationService {
     await this.notificationService.sendNotification(mentorId, message);
   }
 
-  // TODO: async rejectMeetingRecommendation -> update status to REJECTED, insert as event into calendar events DB
+  async getAllOpenMeetingRecommendations(mentorId: string) {
+    return this.meetingRecommendationRepository.findCurrentMeetingRecommendations(
+      mentorId,
+    );
+  }
+
+  async declineMeetingRecommendation(
+    mentorId: string,
+    meetingRecommendationId: string,
+  ) {
+    // Verify if the meeting recommendation belongs to the mentor
+    try {
+      const meetingRecommendation =
+        await this.meetingRecommendationRepository.findMeetingRecommendationById(
+          meetingRecommendationId,
+        );
+
+      if (meetingRecommendation.fromUserId !== mentorId) {
+        throw new Error('Meeting recommendation does not belong to the mentor');
+      }
+    } catch (error) {
+      throw new Error(
+        'Error declining meeting recommendation: ' + error.message,
+      );
+    }
+
+    await this.meetingRecommendationRepository.updateMeetingRecommendationStatus(
+      meetingRecommendationId,
+      AppointmentStatus.REJECTED,
+    );
+  }
 
   private async retrieveLastCompletedMeeting(
     mentorId: string,
@@ -146,12 +188,7 @@ export class MeetingRecommendationService {
 
     await this.meetingRecommendationRepository.saveMeetingRecommendations(
       userRelation.id,
-      [
-        {
-          ...meetingRecommendation,
-          status,
-        },
-      ],
+      [{ ...meetingRecommendation, status }],
     );
   }
 }

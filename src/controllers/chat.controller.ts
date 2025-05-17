@@ -3,7 +3,7 @@ import { MessageDto, MessageRequestDto } from 'src/dtos/message.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { AIService } from '../services/ai.service';
 
-@Controller('api/chat')
+@Controller('chat')
 export class ChatController {
   private messages: MessageDto[] = [];
 
