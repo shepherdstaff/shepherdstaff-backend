@@ -147,6 +147,8 @@ export class UserService {
   ) {
     const encryptedPass = await encryptText(pass);
 
-    return `${process.env.INVITE_LINK_BASE_URL}?menteeId=${menteeId}&username=${username}&encryptedpass=${encryptedPass}`;
+    return {
+      url: `${process.env.INVITE_LINK_BASE_URL}?menteeId=${menteeId}&username=${username}&encryptedpass=${encryptedPass}`,
+    };
   }
 }
