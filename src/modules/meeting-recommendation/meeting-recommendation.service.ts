@@ -122,7 +122,7 @@ export class MeetingRecommendationService {
       newMeetingRecommendations,
     );
 
-    // TODO: Notify mentor about recommended free slots
+    // Notify mentor about recommended free slots
     Logger.debug(recommendedFreeSlots);
     const message =
       recommendedFreeSlots.length > 1
@@ -134,6 +134,10 @@ export class MeetingRecommendationService {
       mentorId,
       'Meeting Recommendation',
       message,
+    );
+
+    Logger.log(
+      `Meeting recommendations sent to mentor ${mentorId} for mentee ${menteeId}`,
     );
   }
 

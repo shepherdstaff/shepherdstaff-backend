@@ -1,8 +1,9 @@
-import { createCipheriv, randomBytes, scrypt } from 'crypto';
+import { createCipheriv, scrypt } from 'crypto';
 import { promisify } from 'util';
 
 export const encryptText = async (textToEncrypt: string) => {
-  const iv = randomBytes(16);
+  const iv = Buffer.from(process.env.ENCRYPTION_IV, 'hex');
+  console.log('iv', iv.toString('hex'));
   const password = process.env.ENCRYPTION_KEY;
 
   // The key length is dependent on the algorithm.
@@ -15,5 +16,5 @@ export const encryptText = async (textToEncrypt: string) => {
     cipher.final(),
   ]);
 
-  return encryptedText.toString();
+  return encryptedText.toString('hex');
 };

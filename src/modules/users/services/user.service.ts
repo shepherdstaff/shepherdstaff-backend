@@ -6,7 +6,7 @@ import { Mentee } from '../domain/mentee';
 import { UsersRepository } from '../repositories/users.repository';
 import { UserAuthEntity } from '../entities/user-auth.entity';
 import { User } from '../domain/user';
-import generator from 'generate-password';
+import * as generator from 'generate-password';
 import { encryptText } from 'src/utils/encrypt';
 
 @Injectable()

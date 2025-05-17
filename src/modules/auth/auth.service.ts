@@ -25,10 +25,7 @@ export class AuthService {
       pass,
     );
 
-    const payload: Partial<UserPayload> = {
-      userId: user.id,
-      username,
-    };
+    const payload: Partial<UserPayload> = { userId: user.id, username };
 
     return {
       access_token: await this.jwtService.signAsync(payload),
