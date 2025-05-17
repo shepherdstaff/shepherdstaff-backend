@@ -17,4 +17,11 @@ export class MeetingRecommendationController {
       menteeId,
     );
   }
+
+  @Get('all')
+  async getAllOpenMeetingRecommendations(@Query('mentorId') mentorId: string) {
+    return this.meetingRecommendationService.getAllOpenMeetingRecommendations(
+      mentorId,
+    );
+  }
 }

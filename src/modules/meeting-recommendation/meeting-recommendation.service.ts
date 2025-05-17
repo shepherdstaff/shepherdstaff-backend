@@ -103,6 +103,12 @@ export class MeetingRecommendationService {
     Logger.debug(recommendedFreeSlots);
   }
 
+  async getAllOpenMeetingRecommendations(mentorId: string) {
+    return this.meetingRecommendationRepository.findCurrentMeetingRecommendations(
+      mentorId,
+    );
+  }
+
   private async retrieveLastCompletedMeeting(
     mentorId: string,
     menteeId: string,
@@ -126,12 +132,7 @@ export class MeetingRecommendationService {
 
     await this.meetingRecommendationRepository.saveMeetingRecommendations(
       userRelation.id,
-      [
-        {
-          ...meetingRecommendation,
-          status,
-        },
-      ],
+      [{ ...meetingRecommendation, status }],
     );
   }
 }
