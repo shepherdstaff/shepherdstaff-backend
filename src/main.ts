@@ -31,9 +31,11 @@ async function bootstrap() {
     return SwaggerModule.createDocument(app, config);
   };
 
-  SwaggerModule.setup('api', app, makeDocument);
+  SwaggerModule.setup('api-docs', app, makeDocument);
 
   app.enableCors();
+
+  app.setGlobalPrefix('api');
 
   await app.listen(process.env.PORT ?? 3000);
 }

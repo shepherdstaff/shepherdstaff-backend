@@ -10,7 +10,7 @@ import {
 import { Prayer } from 'src/interfaces/notes';
 import { NoteService } from '../services/note.service';
 
-@Controller('api')
+@Controller()
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 

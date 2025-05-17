@@ -6,7 +6,7 @@ import { Public } from 'src/decorators/public.decorator';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { CalendarSyncService } from './calendar-sync.service';
 
-@Controller('api/calendar')
+@Controller('calendar')
 export class CalendarController {
   constructor(
     private readonly calendarSyncService: CalendarSyncService,

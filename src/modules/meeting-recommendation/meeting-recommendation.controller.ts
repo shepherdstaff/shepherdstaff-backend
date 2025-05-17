@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Query } from '@nestjs/common';
 import { MeetingRecommendationService } from './meeting-recommendation.service';
 
-@Controller('api/meeting-recommendation')
+@Controller('meeting-recommendation')
 export class MeetingRecommendationController {
   constructor(
     private readonly meetingRecommendationService: MeetingRecommendationService,
