@@ -14,19 +14,13 @@ import { AuthGuard } from './guards/auth.guard';
       useFactory: (configService: ConfigService) => ({
         global: true,
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '360s' },
+        signOptions: { expiresIn: '3600s' },
       }),
       inject: [ConfigService],
     }),
     ConfigModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    {
-      provide: 'APP_GUARD',
-      useClass: AuthGuard,
-    },
-  ],
+  providers: [AuthService, { provide: 'APP_GUARD', useClass: AuthGuard }],
 })
 export class AuthModule {}

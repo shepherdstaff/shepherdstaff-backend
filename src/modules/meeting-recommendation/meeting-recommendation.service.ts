@@ -130,7 +130,11 @@ export class MeetingRecommendationService {
         : `You have a new meeting recommendation with ${menteeId} at ${recommendedFreeSlots[0].startDateTime.toFormat(
             'yyyy-MM-dd HH:mm',
           )}`;
-    await this.notificationService.sendNotification(mentorId, message);
+    await this.notificationService.sendNotification(
+      mentorId,
+      'Meeting Recommendation',
+      message,
+    );
   }
 
   async getAllOpenMeetingRecommendations(mentorId: string) {
