@@ -10,9 +10,7 @@ import {
 import { MeetingRecommendation } from '../domain/meeting-recommendation.domain';
 import { DateTime } from 'luxon';
 
-@Entity({
-  name: 'meeting_recommendation',
-})
+@Entity({ name: 'meeting_recommendation' })
 export class MeetingRecommendationEntity {
   constructor(props?: Partial<MeetingRecommendationEntity>) {
     if (props) Object.assign(this, props);
@@ -38,9 +36,7 @@ export class MeetingRecommendationEntity {
     userRelationId: string,
     meetingRecommendation: MeetingRecommendation,
   ): MeetingRecommendationEntity {
-    const userRelation = new UserRelationEntity({
-      id: userRelationId,
-    });
+    const userRelation = new UserRelationEntity({ id: userRelationId });
 
     return new MeetingRecommendationEntity({
       userRelation,
@@ -52,6 +48,7 @@ export class MeetingRecommendationEntity {
 
   toMeetingRecommendation(): MeetingRecommendation {
     return new MeetingRecommendation({
+      id: this.id,
       fromUserId: this.userRelation.fromUser.id,
       toUserId: this.userRelation.toUser.id,
       startDateTime: DateTime.fromJSDate(this.startDateTime),

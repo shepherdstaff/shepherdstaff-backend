@@ -6,6 +6,7 @@ export class MeetingRecommendation {
     if (props) Object.assign(this, props);
   }
 
+  id: string;
   startDateTime: DateTime;
   endDateTime: DateTime;
   fromUserId: string;
