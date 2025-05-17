@@ -59,6 +59,30 @@ export class MeetingRecommendationRepository {
     );
   }
 
+  async updateMeetingRecommendationStatus(
+    meetingRecommendationId: string,
+    status: AppointmentStatus,
+  ) {
+    await this.meetingRecommendationRepository.update(
+      { id: meetingRecommendationId },
+      { status },
+    );
+  }
+
+  async findMeetingRecommendationById(
+    meetingRecommendationId: string,
+  ): Promise<MeetingRecommendation> {
+    const entity = await this.meetingRecommendationRepository.findOneOrFail({
+      where: { id: meetingRecommendationId },
+      relations: [
+        'userRelation',
+        'userRelation.fromUser',
+        'userRelation.toUser',
+      ],
+    });
+    return entity.toMeetingRecommendation();
+  }
+
   private async findMeetingRecommendationsByFromAndToUserId(
     fromUserId: string,
     status: AppointmentStatus,
@@ -72,9 +96,7 @@ export class MeetingRecommendationRepository {
         toUser: { id: toUserId },
       };
     } else {
-      userWhereOptions = {
-        fromUser: { id: fromUserId },
-      };
+      userWhereOptions = { fromUser: { id: fromUserId } };
     }
 
     let entities: MeetingRecommendationEntity[];
@@ -85,10 +107,7 @@ export class MeetingRecommendationRepository {
           'userRelation.fromUser',
           'userRelation.toUser',
         ],
-        where: {
-          userRelation: userWhereOptions,
-          status,
-        },
+        where: { userRelation: userWhereOptions, status },
         order: { startDateTime: 'DESC' }, // latest first
       });
     } else {
@@ -98,10 +117,7 @@ export class MeetingRecommendationRepository {
           'userRelation.fromUser',
           'userRelation.toUser',
         ],
-        where: {
-          userRelation: userWhereOptions,
-          status,
-        },
+        where: { userRelation: userWhereOptions, status },
         order: { startDateTime: 'DESC' }, // latest first
         take: limit,
       });

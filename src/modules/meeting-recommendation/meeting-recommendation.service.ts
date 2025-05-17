@@ -121,6 +121,32 @@ export class MeetingRecommendationService {
     );
   }
 
+  async declineMeetingRecommendation(
+    mentorId: string,
+    meetingRecommendationId: string,
+  ) {
+    // Verify if the meeting recommendation belongs to the mentor
+    try {
+      const meetingRecommendation =
+        await this.meetingRecommendationRepository.findMeetingRecommendationById(
+          meetingRecommendationId,
+        );
+
+      if (meetingRecommendation.fromUserId !== mentorId) {
+        throw new Error('Meeting recommendation does not belong to the mentor');
+      }
+    } catch (error) {
+      throw new Error(
+        'Error declining meeting recommendation: ' + error.message,
+      );
+    }
+
+    await this.meetingRecommendationRepository.updateMeetingRecommendationStatus(
+      meetingRecommendationId,
+      AppointmentStatus.REJECTED,
+    );
+  }
+
   private async retrieveLastCompletedMeeting(
     mentorId: string,
     menteeId: string,
