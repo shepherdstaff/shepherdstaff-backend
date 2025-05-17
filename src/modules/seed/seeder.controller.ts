@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 import { Public } from 'src/decorators/public.decorator';
 import { UserService } from '../users/services/user.service';
 
-@Controller()
+@Controller('seeder')
 export class SeederController {
   constructor(
     private userService: UserService,

@@ -30,6 +30,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "bcrypt": "^5.1.1",
     "date-fns": "^4.1.0",
+    "generate-password": "^1.7.1",
     "googleapis": "^144.0.0",
     "luxon": "^3.5.0",
     "openai": "^4.68.4",
