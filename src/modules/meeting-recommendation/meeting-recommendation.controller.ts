@@ -7,6 +7,7 @@ export class MeetingRecommendationController {
     private readonly meetingRecommendationService: MeetingRecommendationService,
   ) {}
 
+  // For testing the recommendation logic
   @Get('recommend-meeting')
   async getRecommendedMeetingSlots(
     @Query('mentorId') mentorId: string,
