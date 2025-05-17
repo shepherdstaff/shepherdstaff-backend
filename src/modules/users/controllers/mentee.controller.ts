@@ -24,7 +24,7 @@ export class MenteeController {
     );
   }
 
-  @Get('generate-invite-link/:menteeId')
+  @Post('generate-invite-link/:menteeId')
   async generateInviteLinkForMentee(@Param('menteeId') menteeId: string) {
     return this.userService.generateInviteLinkForMentee(menteeId);
   }
