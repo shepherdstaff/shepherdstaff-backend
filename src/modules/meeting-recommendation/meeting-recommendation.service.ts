@@ -30,7 +30,19 @@ export class MeetingRecommendationService {
     const allMentors = await this.userService.getAllMentors();
     for (const mentor of allMentors) {
       const mentees = await this.userService.getMenteesForMentor(mentor.id);
+      const existingOpenMeetingRecommendations =
+        await this.getAllOpenMeetingRecommendations(mentor.id);
       for (const mentee of mentees) {
+        if (
+          existingOpenMeetingRecommendations.some(
+            (meetingRecommendation) =>
+              meetingRecommendation.toUserId === mentee.id,
+          )
+        ) {
+          // Skip if there is already an open meeting recommendation for this mentee
+          continue;
+        }
+
         const lastCompletedMeeting = await this.retrieveLastCompletedMeeting(
           mentor.id,
           mentee.id,
