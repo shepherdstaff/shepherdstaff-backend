@@ -27,7 +27,7 @@ export class UsersRepository {
     pass?: string,
   ): Promise<UserEntity> {
     const createdUserEntity = await this.userRepository.save(
-      UserEntity.from(user),
+      UserEntity.from(user, userName && pass ? false : true),
     );
 
     if (userName && pass) {

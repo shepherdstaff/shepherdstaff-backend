@@ -42,12 +42,13 @@ export class UserEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  static from(user: User): UserEntity {
+  static from(user: User, isLimited?: boolean): UserEntity {
     const userEntity = new UserEntity();
     userEntity.id = user.id;
     userEntity.name = user.name;
     userEntity.email = user.email;
     userEntity.birthdate = user.birthdate;
+    userEntity.isLimited = isLimited;
 
     return userEntity;
   }
