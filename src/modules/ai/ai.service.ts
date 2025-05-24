@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import {
@@ -6,22 +6,19 @@ import {
   menteeDb,
   mentorAvailabilityDb,
 } from 'src/hacked-database';
-import { NoteService } from '../modules/users/services/note.service';
 
 const RECOMMENDED_DATE_RESULT_PREFIX = '==RESULT==';
 @Injectable()
-export class AIService {
+export class AiService {
   private openai: OpenAI;
 
-  constructor(
-    private configService: ConfigService,
-    @Inject(NoteService) private noteService: NoteService,
-  ) {
+  constructor(private configService: ConfigService) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
     });
   }
 
+  // DEPRECATED: This function is not used anymore - was part of legacy code for #HACK2024 prototype
   async generateRecommendedDate(mentorId: string, menteeId: string) {
     const mentorEvents = mentorAvailabilityDb[mentorId];
     const menteeEvents = menteeAvailabilityDb[menteeId];
@@ -53,12 +50,9 @@ export class AIService {
 
   async generateChatbotResponse(
     message: string,
-    context?: {
-      mentorId: string;
-      menteeId: string;
-    },
+    context?: { mentorId: string; menteeId: string },
   ) {
-    const systemPrompt = await this.buildSystemPrompt(context);
+    const systemPrompt = await this.buildSystemPromptForChatbot(context);
 
     const response = await this.openai.chat.completions.create({
       model: 'gpt-4',
@@ -73,7 +67,35 @@ export class AIService {
     return response.choices[0].message.content;
   }
 
-  private async buildSystemPrompt(context?: {
+  async extractFormattedDatesFromRawPdf(rawPdfText: string) {
+    const systemPrompt = `You will be given raw, unformatted text extracted from the parsing of a PDF file. 
+    This text represents a timetable or schedule of examination dates, and other important dates. 
+    Your task is to extract the dates and return them in a structured format.
+    Please provide the scraped data as a list of JSON objects, with each object having the following structure:
+    {
+      "date": "YYYY-MM-DD",
+      "startTime": "HH:MM",
+      "endTime": "HH:MM",
+      "name": "Event name/description"
+    }
+      
+    Extract dates from the entire text. Do not include any other text or explanation.`;
+
+    const response = await this.openai.chat.completions.create({
+      model: 'o4-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: rawPdfText,
+        },
+      ],
+    });
+
+    return JSON.parse(response.choices[0].message.content);
+  }
+
+  private async buildSystemPromptForChatbot(context?: {
     mentorId: string;
     menteeId: string;
   }): Promise<string> {
@@ -88,14 +110,15 @@ export class AIService {
     if (context) {
       const { menteeId, mentorId } = context;
       const menteeName = menteeDb[menteeId][0];
-      const prayerRequests = await this.noteService.getNotes(
-        mentorId,
-        menteeId,
-      );
+      // TODO: reimplement ai chatbot to include prayer requests
+      // const prayerRequests = await this.noteService.getNotes(
+      //   mentorId,
+      //   menteeId,
+      // );
 
       prompt += `\n\nYou are currently helping with mentoring ${menteeName}.`;
 
-      prompt += `\n\nRecent prayer requests from ${menteeName}:\n${prayerRequests.map((prayer) => prayer.toString()).join('\n')}`;
+      // prompt += `\n\nRecent prayer requests from ${menteeName}:\n${prayerRequests.map((prayer) => prayer.toString()).join('\n')}`;
     }
 
     return prompt;

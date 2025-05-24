@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MessageDto, MessageRequestDto } from 'src/dtos/message.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { AIService } from '../services/ai.service';
+import { AiService } from './ai.service';
 
 @Controller('chat')
 export class ChatController {
   private messages: MessageDto[] = [];
 
-  constructor(private readonly aiService: AIService) {}
+  constructor(private readonly aiService: AiService) {}
 
   @Get('messages')
   async getMessages() {

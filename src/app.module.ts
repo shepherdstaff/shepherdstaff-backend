@@ -3,16 +3,13 @@ import { ConfigModule } from '@nestjs/config';
 import { DiscoveryModule } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChatController } from './controllers/chat.controller';
-import { MeetingController } from './controllers/meeting.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
 import { MeetingRecommendationModule } from './modules/meeting-recommendation/meeting-recommendation.module';
 import { SeederModule } from './modules/seed/seeder.module';
 import { UserModule } from './modules/users/user.module';
-import { AIService } from './services/ai.service';
-import { MeetingRecommendationService } from './services/meeting-recommendation-legacy.service';
 import { NotificationModule } from './modules/notification/notification.module';
+import { DateScraperModule } from './modules/date-scraper/date-scraper.module';
 
 @Module({
   imports: [
@@ -26,7 +23,7 @@ import { NotificationModule } from './modules/notification/notification.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
     UserModule,
     CalendarModule,
@@ -35,8 +32,9 @@ import { NotificationModule } from './modules/notification/notification.module';
     SeederModule,
     MeetingRecommendationModule,
     NotificationModule,
+    DateScraperModule,
   ],
-  controllers: [ChatController, MeetingController],
-  providers: [AIService, MeetingRecommendationService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
