@@ -36,6 +36,12 @@ export class UserEntity {
   )
   incomingUserRelations: UserRelationEntity[];
 
+  @Column({ default: false })
+  isLimited: boolean;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
   static from(user: User): UserEntity {
     const userEntity = new UserEntity();
     userEntity.id = user.id;
