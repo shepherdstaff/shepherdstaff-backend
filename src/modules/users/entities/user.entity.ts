@@ -68,6 +68,7 @@ export class UserEntity {
       name: this.name,
       email: this.email,
       birthdate: this.birthdate,
+      createdAt: this.createdAt,
     });
   }
 }
