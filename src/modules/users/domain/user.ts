@@ -5,6 +5,7 @@ export class User {
   name: string;
   email: string;
   birthdate: Date;
+  createdAt: Date;
 
   constructor(props?: Partial<User>) {
     if (props) Object.assign(this, props);
