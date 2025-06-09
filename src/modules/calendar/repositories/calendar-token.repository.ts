@@ -11,8 +11,10 @@ export class CalendarTokenRepository {
     private calendarTokenRepository: Repository<CalendarTokenEntity>,
   ) {}
 
-  async saveCalendarToken(token: CalendarToken): Promise<CalendarTokenEntity> {
-    return this.calendarTokenRepository.save(CalendarTokenEntity.from(token));
+  async saveCalendarToken(token: CalendarToken): Promise<void> {
+    await this.calendarTokenRepository.upsert(CalendarTokenEntity.from(token), [
+      'userId',
+    ]);
   }
 
   async findTokenByUserId(userId: string): Promise<CalendarTokenEntity> {

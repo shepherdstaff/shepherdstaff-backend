@@ -49,6 +49,17 @@ export class CalendarSyncService {
     const { tokens } = await this.googleOauth2Client.getToken(code);
     this.googleOauth2Client.setCredentials(tokens);
 
+    const now = DateTime.now();
+    const limit = now.plus({ months: 1 }); // TODO: check how often mentor wants to meet mentee, then limit to that
+
+    // Check if refresh token is present, if not, sync calendar events using existing saved access token
+    if (!tokens.refresh_token) {
+      return await this.retrieveLatestCalendarEvents(userId, limit);
+    }
+
+    // Check if access token returned is same as saved one for user
+    // Replace the existing token if different
+
     await this.calendarTokenRepository.saveCalendarToken(
       new CalendarToken({
         userId,
@@ -58,18 +69,7 @@ export class CalendarSyncService {
       }),
     );
 
-    // Retrieve user's calendar events
-    const now = DateTime.now();
-    const limit = now.plus({ months: 1 }); // TODO: check how often mentor wants to meet mentee, then limit to that
-    const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
-
-    // Save user's calendar events to database
-    const savedEvents = await this.scheduleRepository.saveCalendarEvents(
-      userCalendarEvents.map((gCalEvent) => gCalEvent.toCalendarEventDomain()),
-      userId,
-    );
-
-    return savedEvents;
+    return await this.fetchAndSaveGoogleCalendarEvents(userId, limit);
   }
 
   async retrieveLatestCalendarEvents(userId: string, limit: DateTime) {
@@ -93,6 +93,13 @@ export class CalendarSyncService {
       expiry_date: latestToken.expiryDate.getTime(),
     });
 
+    await this.fetchAndSaveGoogleCalendarEvents(userId, limit);
+  }
+
+  private async fetchAndSaveGoogleCalendarEvents(
+    userId: string,
+    limit: DateTime,
+  ) {
     // Retrieve user's calendar events
     const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
     const userCalendarEventsDomain = userCalendarEvents.map((gCalEvent) =>
@@ -104,6 +111,8 @@ export class CalendarSyncService {
       userCalendarEventsDomain,
       userId,
     );
+
+    return userCalendarEventsDomain;
   }
 
   private async refreshAccessToken(calendarToken: CalendarToken) {

@@ -12,7 +12,7 @@ export class CalendarTokenEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   userId: string;
 
   @Column()
