@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { Auth, google } from 'googleapis';
@@ -8,6 +12,10 @@ import { CalendarToken } from './interfaces/calendar-token.domain';
 import { GoogleCalendarEvent } from './interfaces/google-calendar-event.interface';
 import { CalendarTokenRepository } from './repositories/calendar-token.repository';
 import { ScheduleRepository } from './repositories/schedule.repository';
+import {
+  EXPIRED_GOOGLE_OAUTH_REFRESH_TOKEN_ERROR,
+  RefreshTokenExpiredException,
+} from 'src/common/exceptions/refresh-token-expired.exception';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -125,14 +133,25 @@ export class CalendarSyncService {
       refresh_token: calendarToken.refreshToken,
     });
 
-    const { credentials } = await this.googleOauth2Client.refreshAccessToken();
-    calendarToken.accessToken = credentials.access_token;
-    calendarToken.refreshToken =
-      credentials.refresh_token ?? calendarToken.refreshToken;
-    calendarToken.expiryDate = new Date(credentials.expiry_date);
+    try {
+      const { credentials } =
+        await this.googleOauth2Client.refreshAccessToken();
+      calendarToken.accessToken = credentials.access_token;
+      calendarToken.refreshToken =
+        credentials.refresh_token ?? calendarToken.refreshToken;
+      calendarToken.expiryDate = new Date(credentials.expiry_date);
 
-    await this.calendarTokenRepository.saveCalendarToken(calendarToken);
-    return calendarToken;
+      await this.calendarTokenRepository.saveCalendarToken(calendarToken);
+      return calendarToken;
+    } catch (error) {
+      Logger.error(
+        `Failed to refresh access token for user ${calendarToken.userId}: ${error}`,
+      );
+      if (error.error === EXPIRED_GOOGLE_OAUTH_REFRESH_TOKEN_ERROR) {
+        throw new RefreshTokenExpiredException();
+      }
+      throw new InternalServerErrorException('Failed to refresh access token');
+    }
   }
 
   private async fetchGoogleCalendarEvents(
