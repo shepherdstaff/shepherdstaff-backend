@@ -11,12 +11,7 @@ export class CalendarController {
   constructor(
     private readonly calendarSyncService: CalendarSyncService,
     private readonly configService: ConfigService,
-  ) {
-    // TODO: need to find a way to retrieve redirect url from config and pass to decorator
-    // redirectUrlAfterCalendarSync = this.configService.get<string>(
-    //   'CALENDAR_SYNC_CALLBACK_REDIRECT_URL',
-    // );
-  }
+  ) {}
 
   // TODO: for testing purposes, to be removed in production
   @Get('test-sync')
@@ -35,7 +30,7 @@ export class CalendarController {
 
   @Public()
   @Get('google-oauth-callback')
-  @Redirect('http://localhost:5173/dashboard')
+  @Redirect(`${process.env.FRONTEND_URL}/dashboard`)
   async googleOAuthCallback(
     @Query('code') code: string,
     @Query('state') state: string,
