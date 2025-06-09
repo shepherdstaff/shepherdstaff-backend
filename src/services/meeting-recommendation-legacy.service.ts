@@ -7,11 +7,11 @@ import {
 } from 'src/hacked-database';
 import { AppointmentStatus } from 'src/interfaces/appointments';
 import { CalendarEventHacked } from 'src/interfaces/availability';
-import { AIService } from './ai.service';
+import { AiService } from '../modules/ai/ai.service';
 
 @Injectable()
 export class MeetingRecommendationService {
-  constructor(@Inject(AIService) private aiService: AIService) {}
+  constructor(@Inject(AiService) private aiService: AiService) {}
 
   async recommendMeeting(mentorId: string, menteeId: string): Promise<Date> {
     let recommendation = await this.aiService.generateRecommendedDate(
