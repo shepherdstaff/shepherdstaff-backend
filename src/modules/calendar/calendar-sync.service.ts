@@ -34,7 +34,7 @@ export class CalendarSyncService {
     this.googleOauth2Client = new google.auth.OAuth2(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
       this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-      'http://localhost:3000/api/calendar/google-oauth-callback',
+      `${this.configService.get<string>('BACKEND_URL')}/api/calendar/google-oauth-callback`,
     );
   }
 
