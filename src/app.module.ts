@@ -15,11 +15,11 @@ import { DateScraperModule } from './modules/date-scraper/date-scraper.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT, 10),
+      host: process.env.PGHOST,
+      port: parseInt(process.env.PGPORT, 10),
       username: process.env.PGUSER,
       password: process.env.PGPASSWORD,
-      database: process.env.DB_NAME,
+      database: process.env.PGDATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
