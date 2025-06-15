@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CalendarOmissionEntity } from '../entities/calendar-omission.entity';
 import { In, Repository } from 'typeorm';
 import { CalendarSource } from '../constants/calendar-source.enum';
+import { CalendarOmission } from '../domain/calendar-omission.domain';
 
 @Injectable()
 export class CalendarOmissionRepository {
@@ -47,5 +48,13 @@ export class CalendarOmissionRepository {
       'userId',
       'calendarId',
     ]);
+  }
+
+  async getOmittedCalendars(userId: string): Promise<CalendarOmission[]> {
+    const omissions = await this.calendarOmissionRepository.find({
+      where: { userId },
+    });
+
+    return omissions.map((omission) => omission.toCalendarOmission());
   }
 }
