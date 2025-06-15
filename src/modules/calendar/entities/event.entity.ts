@@ -3,6 +3,7 @@ import { UserEntity } from 'src/modules/users/entities/user.entity';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import { CalendarEvent } from '../interfaces/calendar-event.domain';
 @Entity({
   name: 'event',
 })
+@Index(['user', 'calendarId'])
 export class EventEntity {
   constructor(props?: Partial<EventEntity>) {
     if (props) Object.assign(this, props);

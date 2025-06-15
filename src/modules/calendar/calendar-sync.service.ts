@@ -20,6 +20,7 @@ import { CalendarOmissionRepository } from './repositories/calendar-omission.rep
 import { CalendarSource } from './constants/calendar-source.enum';
 import { plainToInstance } from 'class-transformer';
 import { GetCalendarOptionsResponseDto } from './dtos/get-calendar-options-response.dto';
+import { DataSource } from 'typeorm';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -34,6 +35,7 @@ export class CalendarSyncService {
     private scheduleRepository: ScheduleRepository,
     private calendarTokenRepository: CalendarTokenRepository,
     private calendarOmissionRepository: CalendarOmissionRepository,
+    private dataSource: DataSource,
   ) {
     // Setup your API client
     this.googleOauth2Client = new google.auth.OAuth2(
@@ -112,10 +114,30 @@ export class CalendarSyncService {
   }
 
   async setCalendarOptions(userId: string, calendarsToOmit: string[]) {
-    await this.calendarOmissionRepository.saveCalendarOmissions(
-      userId,
-      calendarsToOmit,
-    );
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await this.calendarOmissionRepository.saveCalendarOmissions(
+        userId,
+        calendarsToOmit,
+        queryRunner,
+      );
+      await this.scheduleRepository.clearSavedCalendarEventsOfSourceCalendarIds(
+        userId,
+        calendarsToOmit,
+        queryRunner,
+      );
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      Logger.error(
+        `Failed to set calendar options for user ${userId}: ${error}`,
+      );
+      throw new InternalServerErrorException('Failed to set calendar options');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   private async setGoogleOauth2ClientCredentials(userId: string) {

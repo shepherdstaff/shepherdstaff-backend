@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateTime } from 'luxon';
-import { Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { EventEntity } from '../entities/event.entity';
 import { CalendarEvent } from '../interfaces/calendar-event.domain';
+import { TransactionalRepository } from 'src/common/transactional.repository';
 
 /**
  * Service class responsible for handling operations related to saving scheduled events.
  */
 @Injectable()
-export class ScheduleRepository {
+export class ScheduleRepository extends TransactionalRepository<EventEntity> {
   /**
    * Creates an instance of ScheduleRepository.
    * @param eventsRepository - The repository used to interact with the `EventEntity` in the database.
@@ -17,7 +18,9 @@ export class ScheduleRepository {
   constructor(
     @InjectRepository(EventEntity)
     private eventsRepository: Repository<EventEntity>,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Saves an array of calendar events associated with a specific user to the database.
@@ -68,5 +71,18 @@ export class ScheduleRepository {
       .getMany();
 
     return events.map((event) => event.toCalendarEvent());
+  }
+
+  public async clearSavedCalendarEventsOfSourceCalendarIds(
+    userId: string,
+    calendarIds: string[],
+    queryRunner?: QueryRunner,
+  ) {
+    // Delete all events for the user with the specified calendarId
+    const repository = this.useRepository(this.eventsRepository, queryRunner);
+    await repository.delete({
+      user: { id: userId },
+      calendarId: In(calendarIds),
+    });
   }
 }
