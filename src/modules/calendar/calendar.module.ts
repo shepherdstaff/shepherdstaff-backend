@@ -8,11 +8,17 @@ import { EventEntity } from './entities/event.entity';
 import { CalendarTokenRepository } from './repositories/calendar-token.repository';
 import { ScheduleRepository } from './repositories/schedule.repository';
 import { ScheduleService } from './schedule.service';
+import { CalendarOmissionRepository } from './repositories/calendar-omission.repository';
+import { CalendarOmissionEntity } from './entities/calendar-omission.entity';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([EventEntity, CalendarTokenEntity]),
+    TypeOrmModule.forFeature([
+      EventEntity,
+      CalendarTokenEntity,
+      CalendarOmissionEntity,
+    ]),
   ],
   controllers: [CalendarController],
   providers: [
@@ -20,6 +26,7 @@ import { ScheduleService } from './schedule.service';
     ScheduleService,
     ScheduleRepository,
     CalendarTokenRepository,
+    CalendarOmissionRepository,
   ],
   exports: [ScheduleService],
 })

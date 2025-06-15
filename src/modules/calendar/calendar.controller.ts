@@ -1,10 +1,20 @@
-import { Controller, Get, Query, Redirect, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Redirect,
+  Req,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { DateTime } from 'luxon';
 import { Public } from 'src/decorators/public.decorator';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { CalendarSyncService } from './calendar-sync.service';
+import { ApiOperation } from '@nestjs/swagger';
+import { SetCalendarOptionsRequestDto } from './dtos/set-calendar-options-request.dto';
 
 @Controller('calendar')
 export class CalendarController {
@@ -36,5 +46,28 @@ export class CalendarController {
     @Query('state') state: string,
   ) {
     return this.calendarSyncService.googleOAuthCallback(code, state);
+  }
+
+  @ApiOperation({
+    summary:
+      'Modify calendar options, i.e. choose which calendars to omit from meeting recommendation consideration',
+  })
+  @Post('calendar-options')
+  async setCalendarOptions(
+    @Req() req: Request,
+    @Body() body: SetCalendarOptionsRequestDto,
+  ) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+
+    return this.calendarSyncService.setCalendarOptions(
+      userPayload.userId,
+      body.calendarsToOmit,
+    );
+  }
+
+  @Get('calendar-options')
+  async getCalendarOptions(@Req() req: Request) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return this.calendarSyncService.getCalendarOptions(userPayload.userId);
   }
 }

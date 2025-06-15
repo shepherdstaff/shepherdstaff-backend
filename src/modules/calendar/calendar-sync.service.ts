@@ -16,6 +16,10 @@ import {
   EXPIRED_GOOGLE_OAUTH_REFRESH_TOKEN_ERROR,
   RefreshTokenExpiredException,
 } from 'src/common/exceptions/refresh-token-expired.exception';
+import { CalendarOmissionRepository } from './repositories/calendar-omission.repository';
+import { CalendarSource } from './constants/calendar-source.enum';
+import { plainToInstance } from 'class-transformer';
+import { GetCalendarOptionsResponseDto } from './dtos/get-calendar-options-response.dto';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -29,6 +33,7 @@ export class CalendarSyncService {
     private configService: ConfigService,
     private scheduleRepository: ScheduleRepository,
     private calendarTokenRepository: CalendarTokenRepository,
+    private calendarOmissionRepository: CalendarOmissionRepository,
   ) {
     // Setup your API client
     this.googleOauth2Client = new google.auth.OAuth2(
@@ -81,6 +86,39 @@ export class CalendarSyncService {
   }
 
   async retrieveLatestCalendarEvents(userId: string, limit: DateTime) {
+    await this.setGoogleOauth2ClientCredentials(userId);
+
+    await this.fetchAndSaveGoogleCalendarEvents(userId, limit);
+  }
+
+  async getCalendarOptions(userId: string) {
+    await this.setGoogleOauth2ClientCredentials(userId);
+
+    const googleCalendar = google.calendar({
+      version: 'v3',
+      auth: this.googleOauth2Client,
+    });
+
+    const calendars = (await googleCalendar.calendarList.list()).data.items;
+    const parsedCalendars = calendars.map((cal) => ({
+      id: cal.id,
+      name: cal.summary,
+      source: CalendarSource.GOOGLE, // TODO: change when we support other sources
+    }));
+
+    return plainToInstance(GetCalendarOptionsResponseDto, {
+      calendars: parsedCalendars,
+    });
+  }
+
+  async setCalendarOptions(userId: string, calendarsToOmit: string[]) {
+    await this.calendarOmissionRepository.saveCalendarOmissions(
+      userId,
+      calendarsToOmit,
+    );
+  }
+
+  private async setGoogleOauth2ClientCredentials(userId: string) {
     let calendarToken: CalendarToken;
     try {
       calendarToken = (
@@ -100,8 +138,6 @@ export class CalendarSyncService {
       refresh_token: latestToken.refreshToken,
       expiry_date: latestToken.expiryDate.getTime(),
     });
-
-    await this.fetchAndSaveGoogleCalendarEvents(userId, limit);
   }
 
   private async fetchAndSaveGoogleCalendarEvents(
@@ -110,6 +146,10 @@ export class CalendarSyncService {
   ) {
     // Retrieve user's calendar events
     const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
+    console.log(
+      '🚀 ~ CalendarSyncService ~ userCalendarEvents:',
+      userCalendarEvents,
+    );
     const userCalendarEventsDomain = userCalendarEvents.map((gCalEvent) =>
       gCalEvent.toCalendarEventDomain(),
     );
