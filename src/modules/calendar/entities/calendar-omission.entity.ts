@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { CalendarSource } from '../constants/calendar-source.enum';
 
 @Entity({ name: 'calendar_omission' })
+@Index(['userId', 'calendarId'], { unique: true })
 export class CalendarOmissionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
