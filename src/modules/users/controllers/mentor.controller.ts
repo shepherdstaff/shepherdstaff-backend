@@ -21,7 +21,7 @@ export class MentorController {
     );
   }
 
-  @Get()
+  @Get('/:mentorId')
   async getMentor(@Param('mentorId') mentorId: string) {
     return this.userService.getMentor(mentorId);
   }

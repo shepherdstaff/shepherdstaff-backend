@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { CalendarSyncService } from './calendar-sync.service';
 import { FreeSlot } from './interfaces/free-slot.domain';
@@ -31,7 +31,18 @@ export class ScheduleService {
       } else {
         const lastMergedEvent = mergedEvents[mergedEvents.length - 1];
 
-        if (event.startDateTime <= lastMergedEvent.endDateTime) {
+        const eventsAreOverlapping = this.areEventsOverlapping(
+          lastMergedEvent,
+          event,
+        );
+
+        if (
+          eventsAreOverlapping &&
+          !this.doesEarlierStartingEventFullyOverlapLaterStartingEvent(
+            lastMergedEvent,
+            event,
+          )
+        ) {
           // Merge overlapping events by extending the end time
           lastMergedEvent.endDateTime = DateTime.fromJSDate(
             new Date(
@@ -41,7 +52,7 @@ export class ScheduleService {
               ),
             ),
           );
-        } else {
+        } else if (!eventsAreOverlapping) {
           // No overlap: add the event to the list
           mergedEvents.push(event);
         }
@@ -58,11 +69,36 @@ export class ScheduleService {
       const currentEvent = mergedEvents[i];
 
       if (prevEvent.endDateTime < currentEvent.startDateTime) {
-        freeSlots.push({
-          startDateTime: prevEvent.endDateTime,
-          endDateTime: currentEvent.startDateTime,
-        });
+        // Ensure each free slot is set amount of time
+        // TODO: fetch user preferences (how long free slots should be) to determine how long each free slot should be
+        // For now, we assume 60 minutes free slots
+
+        const freeSlotDuration = 60; // in minutes
+        for (
+          let newFreeSlotStart = prevEvent.endDateTime;
+          newFreeSlotStart < currentEvent.startDateTime;
+          newFreeSlotStart = newFreeSlotStart.plus({
+            minutes: freeSlotDuration,
+          })
+        ) {
+          const newFreeSlotEnd = newFreeSlotStart.plus({
+            minutes: freeSlotDuration,
+          });
+          if (newFreeSlotEnd <= currentEvent.startDateTime) {
+            freeSlots.push({
+              startDateTime: newFreeSlotStart,
+              endDateTime: newFreeSlotEnd,
+            });
+          }
+        }
       }
+    }
+
+    if (freeSlots.length === 0) {
+      Logger.error(
+        'No free slots found between busy timeslots - you may be fully booked!',
+      );
+      throw new Error('No free slots found between busy timeslots');
     }
 
     return freeSlots;
@@ -106,5 +142,22 @@ export class ScheduleService {
 
     // Return the first n free slots
     return freeSlots.slice(0, numberOfSlotsToFind);
+  }
+
+  private areEventsOverlapping(
+    prevEvent: ScheduleSlot,
+    currentEvent: ScheduleSlot,
+  ): boolean {
+    return (
+      prevEvent.endDateTime > currentEvent.startDateTime &&
+      prevEvent.startDateTime < currentEvent.endDateTime
+    );
+  }
+
+  private doesEarlierStartingEventFullyOverlapLaterStartingEvent(
+    earlierStartingEvent: ScheduleSlot,
+    laterStartingEvent: ScheduleSlot,
+  ): boolean {
+    return earlierStartingEvent.endDateTime >= laterStartingEvent.endDateTime;
   }
 }

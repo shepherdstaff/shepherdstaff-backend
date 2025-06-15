@@ -123,7 +123,6 @@ export class MeetingRecommendationService {
     );
 
     // Notify mentor about recommended free slots
-    Logger.debug(recommendedFreeSlots);
     const message =
       recommendedFreeSlots.length > 1
         ? `You have new meeting recommendations with ${menteeId}`
