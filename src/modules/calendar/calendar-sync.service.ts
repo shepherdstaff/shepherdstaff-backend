@@ -145,10 +145,9 @@ export class CalendarSyncService {
     limit: DateTime,
   ) {
     // Retrieve user's calendar events
-    const userCalendarEvents = await this.fetchGoogleCalendarEvents(limit);
-    console.log(
-      '🚀 ~ CalendarSyncService ~ userCalendarEvents:',
-      userCalendarEvents,
+    const userCalendarEvents = await this.fetchGoogleCalendarEvents(
+      userId,
+      limit,
     );
     const userCalendarEventsDomain = userCalendarEvents.map((gCalEvent) =>
       gCalEvent.toCalendarEventDomain(),
@@ -195,6 +194,7 @@ export class CalendarSyncService {
   }
 
   private async fetchGoogleCalendarEvents(
+    userId: string,
     limitToDate: DateTime,
   ): Promise<GoogleCalendarEvent[]> {
     const googleCalendar = google.calendar({
@@ -205,10 +205,21 @@ export class CalendarSyncService {
     const now = DateTime.now();
     const calendars = (await googleCalendar.calendarList.list()).data.items;
 
-    // TODO: allow users to omit calendars
+    // Ignore events from omitted calendars
+    const omittedCalendars =
+      await this.calendarOmissionRepository.getOmittedCalendars(userId);
+    const omittedCalendarsSet = new Set(
+      omittedCalendars.map((omission) => omission.calendarId),
+    );
 
     const userCalendarEvents: GoogleCalendarEvent[] = [];
     for (const calendar of calendars) {
+      if (omittedCalendarsSet.has(calendar.id)) {
+        Logger.debug(
+          `Skipping omitted calendar: ${calendar.summary} (${calendar.id})`,
+        );
+        continue;
+      }
       const eventsResponse = await googleCalendar.events.list({
         calendarId: calendar.id,
         timeMin: now.toISO(),
