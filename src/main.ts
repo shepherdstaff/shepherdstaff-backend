@@ -55,7 +55,11 @@ async function bootstrap() {
 
   SwaggerModule.setup('api-docs', app, makeDocument);
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.FRONTEND_URL,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   app.setGlobalPrefix('api');
 
