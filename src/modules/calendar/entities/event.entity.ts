@@ -36,6 +36,9 @@ export class EventEntity {
   @Column()
   hasTimings: boolean;
 
+  @Column()
+  calendarId: string;
+
   @ManyToOne(
     () => UserEntity,
     (user) => user.id, //reverse relation
@@ -52,6 +55,7 @@ export class EventEntity {
       endDateTime: calendarEvent.endDateTime.toJSDate(),
       hasTimings: calendarEvent.hasTimings,
       user: new UserEntity({ id: userId }),
+      calendarId: calendarEvent.calendarId,
     });
   }
 
@@ -63,6 +67,7 @@ export class EventEntity {
       startDateTime: DateTime.fromJSDate(this.startDateTime),
       endDateTime: DateTime.fromJSDate(this.endDateTime),
       hasTimings: this.hasTimings,
+      calendarId: this.calendarId,
     };
   }
 }

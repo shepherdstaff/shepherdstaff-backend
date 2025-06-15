@@ -5,4 +5,5 @@ export class CalendarEvent extends ScheduleSlot {
   id: string;
   sourceId: string;
   hasTimings: boolean;
+  calendarId: string;
 }

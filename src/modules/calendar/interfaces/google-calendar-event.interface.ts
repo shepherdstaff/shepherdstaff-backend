@@ -99,6 +99,7 @@ export class GoogleCalendarEvent {
       startDateTime: DateTime.fromISO(this.start.date || this.start.dateTime),
       endDateTime: DateTime.fromISO(this.end.date || this.end.dateTime),
       hasTimings: !this.start.date,
+      calendarId: this.organizer.email,
     };
   }
 }
