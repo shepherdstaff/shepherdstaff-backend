@@ -1,7 +1,6 @@
 // services/mentee.service.ts
 import { Injectable } from '@nestjs/common';
 import { PreferenceService } from 'src/modules/preferences/preference.service';
-import { menteeDb } from '../../../hacked-database';
 import { Mentee } from '../domain/mentee';
 import { UsersRepository } from '../repositories/users.repository';
 import { UserAuthEntity } from '../entities/user-auth.entity';
@@ -34,11 +33,6 @@ export class UserService {
     );
 
     return createdMenteeEntity.toMentee();
-  }
-
-  generateNewMenteeId(): string {
-    const newIndex = Object.keys(menteeDb).length + 1;
-    return 'mentee-' + newIndex;
   }
 
   async createNewUser(

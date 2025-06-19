@@ -1,6 +1,6 @@
 // controllers/mentee.controller.ts
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { NoteService } from 'src/modules/users/services/note.service';
+import { NoteService } from 'src/modules/notes/notes.service';
 import { CreateMenteeDto } from '../dto/mentee.dto';
 import { UserService } from '../services/user.service';
 import { ApiOperation } from '@nestjs/swagger';
