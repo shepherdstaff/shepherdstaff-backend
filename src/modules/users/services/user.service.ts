@@ -94,6 +94,11 @@ export class UserService {
     );
   }
 
+  async getMentee(menteeId: string): Promise<Mentee> {
+    const user = await this.usersRepository.findUserById(menteeId);
+    return user.toMentee();
+  }
+
   async getUserRelation(fromUserId: string, toUserId: string) {
     return this.usersRepository.getUserRelation(fromUserId, toUserId);
   }
