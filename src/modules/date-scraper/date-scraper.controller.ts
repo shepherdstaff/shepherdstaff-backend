@@ -11,4 +11,10 @@ export class DateScraperController {
     const scrapedDates = await this.dateScraperService.processDatesFromPdf();
     return scrapedDates;
   }
+
+  @Get('important-dates')
+  async getAllImportantDates() {
+    const importantDates = await this.dateScraperService.getAllImportantDates();
+    return importantDates;
+  }
 }

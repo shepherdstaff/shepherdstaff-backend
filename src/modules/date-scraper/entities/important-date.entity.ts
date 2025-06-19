@@ -21,12 +21,15 @@ export class ImportantDateEntity {
   name: string;
 
   toImportantDate(): ImportantDate {
-    return plainToInstance(ImportantDate, {
-      date: DateTime.fromJSDate(this.date),
+    const imptDate = plainToInstance(ImportantDate, {
+      date: null,
       startTime: this.startTime,
       endTime: this.endTime,
       name: this.name,
     });
+    // Hacky way to get around deep copy issues with DateTime
+    imptDate.date = DateTime.fromJSDate(this.date);
+    return imptDate;
   }
 
   static from(importantDate: ImportantDate): ImportantDateEntity {

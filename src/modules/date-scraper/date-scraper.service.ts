@@ -124,6 +124,13 @@ export class DateScraperService {
     }
   }
 
+  async getAllImportantDates(): Promise<ImportantDate[]> {
+    // Fetch all important dates from the repository
+    const importantDates =
+      await this.dateScraperRepository.getAllImportantDates();
+    return importantDates;
+  }
+
   private splitPdfRawTextIntoPages(rawPdfText: string): string[] {
     // Split the raw PDF text into pages based on the page break pattern
     const pageBreakPattern = /Page \d+ of \d+/g;
