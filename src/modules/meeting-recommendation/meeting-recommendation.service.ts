@@ -23,6 +23,12 @@ export class MeetingRecommendationService {
     await this.meetingRecommendationRepository.completeAllPendingMeetings();
   }
 
+  async completeMeetingsForMentor(mentorId: string) {
+    await this.meetingRecommendationRepository.completeAllPendingMeetings(
+      mentorId,
+    );
+  }
+
   // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkForMeetingsToRecommend() {
     // Find last completed meeting for each mentor-mentee pair

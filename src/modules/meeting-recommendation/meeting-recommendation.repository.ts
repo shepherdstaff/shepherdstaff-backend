@@ -63,7 +63,19 @@ export class MeetingRecommendationRepository {
     );
   }
 
-  async completeAllPendingMeetings(): Promise<void> {
+  async completeAllPendingMeetings(userId?: string): Promise<void> {
+    if (userId) {
+      await this.meetingRecommendationRepository.update(
+        {
+          status: AppointmentStatus.PENDING,
+          startDateTime: LessThanOrEqual(new Date()),
+          userRelation: { fromUser: { id: userId } },
+        },
+        { status: AppointmentStatus.COMPLETED },
+      );
+      return;
+    }
+
     await this.meetingRecommendationRepository.update(
       {
         status: AppointmentStatus.PENDING,
