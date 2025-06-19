@@ -33,12 +33,16 @@ export class BlockedTimeEntity {
   user: UserEntity;
 
   toDomain(): BlockedTime {
-    return plainToInstance(BlockedTime, {
+    const domain = plainToInstance(BlockedTime, {
       day: this.day,
-      startTime: DateTime.fromJSDate(this.startTime),
-      endTime: DateTime.fromJSDate(this.endTime),
+      startTime: null,
+      endTime: null,
       userId: this.user.id,
     });
+
+    domain.startTime = DateTime.fromJSDate(this.startTime);
+    domain.endTime = DateTime.fromJSDate(this.endTime);
+    return domain;
   }
 
   static from(blockedTime: BlockedTime): BlockedTimeEntity {

@@ -92,4 +92,13 @@ export class CalendarController {
       plainToInstance(BlockedTimeDto, body.blockedTimes),
     );
   }
+
+  @Get('blocked-times')
+  @ApiOperation({
+    summary: 'Get the blocked times for a user',
+  })
+  async getBlockedTimes(@Req() req: Request) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return this.calendarSyncService.getBlockedTimes(userPayload.userId);
+  }
 }

@@ -97,4 +97,13 @@ export class ScheduleRepository extends TransactionalRepository<EventEntity> {
 
     await this.blockedTimeRepository.save(blockedTimeEntities);
   }
+
+  public async getBlockedTimesForUser(userId: string): Promise<BlockedTime[]> {
+    const blockedTimes = await this.blockedTimeRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
+
+    return blockedTimes.map((entity) => entity.toDomain());
+  }
 }

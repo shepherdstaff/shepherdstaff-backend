@@ -167,6 +167,19 @@ export class CalendarSyncService {
     }
   }
 
+  async getBlockedTimes(userId: string): Promise<BlockedTimeDto[]> {
+    try {
+      const blockedTimes =
+        await this.scheduleRepository.getBlockedTimesForUser(userId);
+      return blockedTimes.map((blockedTime) =>
+        BlockedTimeDto.from(blockedTime),
+      );
+    } catch (error) {
+      Logger.error(`Failed to get blocked times for user ${userId}: ${error}`);
+      throw new InternalServerErrorException('Failed to get blocked times');
+    }
+  }
+
   private async setGoogleOauth2ClientCredentials(userId: string) {
     let calendarToken: CalendarToken;
     try {

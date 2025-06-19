@@ -48,4 +48,12 @@ export class BlockedTimeDto {
     domain.endTime = DateTime.fromISO(this.endTime);
     return domain;
   }
+
+  static from(blockedTime: BlockedTime): BlockedTimeDto {
+    return plainToInstance(BlockedTimeDto, {
+      startTime: blockedTime.startTime.toISO(),
+      endTime: blockedTime.endTime.toISO(),
+      day: blockedTime.day,
+    });
+  }
 }
