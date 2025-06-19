@@ -54,7 +54,7 @@ async function bootstrap() {
   };
 
   if (process.env.NODE_ENV !== 'production') {
-    SwaggerModule.setup('api-docs', app, makeDocument());
+    SwaggerModule.setup('api-docs', app, makeDocument);
   }
 
   app.enableCors({
