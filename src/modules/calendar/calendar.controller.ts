@@ -99,6 +99,8 @@ export class CalendarController {
   })
   async getBlockedTimes(@Req() req: Request) {
     const userPayload = retrieveUserInfoFromRequest(req);
-    return this.calendarSyncService.getBlockedTimes(userPayload.userId);
+    return (
+      await this.calendarSyncService.getBlockedTimes(userPayload.userId)
+    ).map((blockedTime) => BlockedTimeDto.from(blockedTime));
   }
 }

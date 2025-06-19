@@ -22,6 +22,7 @@ import { plainToInstance } from 'class-transformer';
 import { GetCalendarOptionsResponseDto } from './dtos/get-calendar-options-response.dto';
 import { DataSource } from 'typeorm';
 import { BlockedTimeDto } from './dtos/blocked-time.dto';
+import { BlockedTime } from './domain/blocked-time.domain';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -167,13 +168,11 @@ export class CalendarSyncService {
     }
   }
 
-  async getBlockedTimes(userId: string): Promise<BlockedTimeDto[]> {
+  async getBlockedTimes(userId: string): Promise<BlockedTime[]> {
     try {
       const blockedTimes =
         await this.scheduleRepository.getBlockedTimesForUser(userId);
-      return blockedTimes.map((blockedTime) =>
-        BlockedTimeDto.from(blockedTime),
-      );
+      return blockedTimes;
     } catch (error) {
       Logger.error(`Failed to get blocked times for user ${userId}: ${error}`);
       throw new InternalServerErrorException('Failed to get blocked times');
