@@ -106,7 +106,18 @@ export class CalendarSyncService {
       id: cal.id,
       name: cal.summary,
       source: CalendarSource.GOOGLE, // TODO: change when we support other sources
+      isOmitted: false,
     }));
+
+    const existingOmittedCalendars =
+      await this.calendarOmissionRepository.getOmittedCalendars(userId);
+    const omittedCalendarsSet = new Set(
+      existingOmittedCalendars.map((omission) => omission.calendarId),
+    );
+
+    parsedCalendars.forEach((calendar) => {
+      calendar.isOmitted = omittedCalendarsSet.has(calendar.id);
+    });
 
     return plainToInstance(GetCalendarOptionsResponseDto, {
       calendars: parsedCalendars,
