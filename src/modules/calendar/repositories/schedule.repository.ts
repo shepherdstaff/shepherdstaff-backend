@@ -5,6 +5,8 @@ import { In, QueryRunner, Repository } from 'typeorm';
 import { EventEntity } from '../entities/event.entity';
 import { CalendarEvent } from '../interfaces/calendar-event.domain';
 import { TransactionalRepository } from 'src/common/transactional.repository';
+import { BlockedTime } from '../domain/blocked-time.domain';
+import { BlockedTimeEntity } from '../entities/blocked-time.entity';
 
 /**
  * Service class responsible for handling operations related to saving scheduled events.
@@ -18,6 +20,8 @@ export class ScheduleRepository extends TransactionalRepository<EventEntity> {
   constructor(
     @InjectRepository(EventEntity)
     private eventsRepository: Repository<EventEntity>,
+    @InjectRepository(BlockedTimeEntity)
+    private blockedTimeRepository: Repository<BlockedTimeEntity>,
   ) {
     super();
   }
@@ -84,5 +88,13 @@ export class ScheduleRepository extends TransactionalRepository<EventEntity> {
       user: { id: userId },
       calendarId: In(calendarIds),
     });
+  }
+
+  public async saveBlockedTimes(blockedTimes: BlockedTime[]): Promise<void> {
+    const blockedTimeEntities = blockedTimes.map((blockedTime) =>
+      BlockedTimeEntity.from(blockedTime),
+    );
+
+    await this.blockedTimeRepository.save(blockedTimeEntities);
   }
 }

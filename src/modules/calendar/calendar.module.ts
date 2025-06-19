@@ -10,6 +10,7 @@ import { ScheduleRepository } from './repositories/schedule.repository';
 import { ScheduleService } from './schedule.service';
 import { CalendarOmissionRepository } from './repositories/calendar-omission.repository';
 import { CalendarOmissionEntity } from './entities/calendar-omission.entity';
+import { BlockedTimeEntity } from './entities/blocked-time.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CalendarOmissionEntity } from './entities/calendar-omission.entity';
       EventEntity,
       CalendarTokenEntity,
       CalendarOmissionEntity,
+      BlockedTimeEntity,
     ]),
   ],
   controllers: [CalendarController],

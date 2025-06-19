@@ -15,6 +15,9 @@ import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { CalendarSyncService } from './calendar-sync.service';
 import { ApiOperation } from '@nestjs/swagger';
 import { SetCalendarOptionsRequestDto } from './dtos/set-calendar-options-request.dto';
+import { UpdateBlockedTimesRequestDto } from './dtos/update-blocked-times-request.dto';
+import { BlockedTimeDto } from './dtos/blocked-time.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('calendar')
 export class CalendarController {
@@ -72,5 +75,21 @@ export class CalendarController {
   async getCalendarOptions(@Req() req: Request) {
     const userPayload = retrieveUserInfoFromRequest(req);
     return this.calendarSyncService.getCalendarOptions(userPayload.userId);
+  }
+
+  @Post('update-blocked-times')
+  @ApiOperation({
+    summary:
+      'Update the blocked times for a user, i.e. times when they are not available for meetings',
+  })
+  async updateBlockedTimes(
+    @Req() req: Request,
+    @Body() body: UpdateBlockedTimesRequestDto,
+  ) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return this.calendarSyncService.updateBlockedTimes(
+      userPayload.userId,
+      plainToInstance(BlockedTimeDto, body.blockedTimes),
+    );
   }
 }

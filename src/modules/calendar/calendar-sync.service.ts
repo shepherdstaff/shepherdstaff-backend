@@ -21,6 +21,7 @@ import { CalendarSource } from './constants/calendar-source.enum';
 import { plainToInstance } from 'class-transformer';
 import { GetCalendarOptionsResponseDto } from './dtos/get-calendar-options-response.dto';
 import { DataSource } from 'typeorm';
+import { BlockedTimeDto } from './dtos/blocked-time.dto';
 
 // TODO: move to redis
 const userStateMap: { [state: string]: string } = {};
@@ -148,6 +149,21 @@ export class CalendarSyncService {
       throw new InternalServerErrorException('Failed to set calendar options');
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  async updateBlockedTimes(userId: string, blockedTimes: BlockedTimeDto[]) {
+    const blockedTimesDomain = blockedTimes.map((blockedTimeDto) =>
+      blockedTimeDto.toDomain(userId),
+    );
+
+    try {
+      await this.scheduleRepository.saveBlockedTimes(blockedTimesDomain);
+    } catch (error) {
+      Logger.error(
+        `Failed to update blocked times for user ${userId}: ${error}`,
+      );
+      throw new InternalServerErrorException('Failed to update blocked times');
     }
   }
 
