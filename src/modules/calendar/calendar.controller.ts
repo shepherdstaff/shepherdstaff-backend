@@ -37,15 +37,18 @@ export class CalendarController {
     const userPayload = retrieveUserInfoFromRequest(req);
     return this.calendarSyncService.initiateGoogleOAuth(userPayload);
   }
-
   @Public()
   @Get('google-oauth-callback')
-  @Redirect(`${process.env.FRONTEND_URL}/dashboard`)
+  @Redirect()
   async googleOAuthCallback(
     @Query('code') code: string,
     @Query('state') state: string,
   ) {
-    return this.calendarSyncService.googleOAuthCallback(code, state);
+    await this.calendarSyncService.googleOAuthCallback(code, state);
+    return {
+      url: `${process.env.FRONTEND_URL}/dashboard`,
+      statusCode: 302,
+    };
   }
 
   @ApiOperation({
