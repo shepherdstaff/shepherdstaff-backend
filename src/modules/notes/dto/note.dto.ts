@@ -6,6 +6,10 @@ import { DateTime } from 'luxon';
 
 export class NoteDto {
   @Expose()
+  @ApiProperty({ description: 'Unique identifier of the note' })
+  id: string;
+
+  @Expose()
   @ApiProperty({ description: 'Content of the note' })
   @IsString()
   content: string;
@@ -37,6 +41,7 @@ export class NoteDto {
 
   static from(note: Note): NoteDto {
     return plainToInstance(NoteDto, {
+      id: note.id,
       content: note.content,
       createdAt: note.createdAt.toJSDate(),
       updatedAt: note.updatedAt.toJSDate(),

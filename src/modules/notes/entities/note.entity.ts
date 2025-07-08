@@ -46,6 +46,7 @@ export class NoteEntity {
 
   toDomain(): Note {
     const note = plainToInstance(Note, {
+      id: this.id,
       content: this.content,
       createdAt: null,
       updatedAt: null,

@@ -20,7 +20,7 @@ export class NotesService {
 
     return await this.notesRepository.createNote(mentorId, menteeId, note);
   }
-  // async editNote(
+  // async updateNote(
   //   mentorId: string,
   //   menteeId: string,
   //   noteId: string,
