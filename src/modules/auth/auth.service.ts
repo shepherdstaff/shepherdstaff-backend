@@ -21,6 +21,7 @@ export class AuthService {
       signupInfo.name,
       signupInfo.birthdate,
       signupInfo.email,
+      signupInfo.phoneNumber,
       username,
       pass,
     );

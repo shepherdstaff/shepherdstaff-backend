@@ -11,11 +11,12 @@ export class MentorController {
   @Public()
   @Post()
   async createNewMentor(@Body() mentorDto: CreateMentorDto) {
-    const { name, birthdate, email, userName, pass } = mentorDto;
+    const { name, birthdate, email, phoneNumber, userName, pass } = mentorDto;
     return this.userService.createNewMentor(
       name,
       new Date(birthdate),
       email,
+      phoneNumber,
       userName,
       pass,
     );

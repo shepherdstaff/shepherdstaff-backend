@@ -26,6 +26,7 @@ export class SeederController {
     const mentor1BirthDate = DateTime.fromISO(
       '1990-01-10T16:08:49Z',
     ).toJSDate();
+    const mentor1PhoneNumber = '123-456-7890';
     const mentor1User = 'mentor1';
     const mentor1Pass = 'mentor1';
 
@@ -33,6 +34,7 @@ export class SeederController {
       mentor1Name,
       mentor1BirthDate,
       mentor1Email,
+      mentor1PhoneNumber,
       mentor1User,
       mentor1Pass,
     );

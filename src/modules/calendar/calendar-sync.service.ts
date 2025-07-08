@@ -158,13 +158,28 @@ export class CalendarSyncService {
       blockedTimeDto.toDomain(userId),
     );
 
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      await this.scheduleRepository.saveBlockedTimes(blockedTimesDomain);
+      await this.scheduleRepository.clearBlockedTimesForUser(
+        userId,
+        queryRunner,
+      );
+      await this.scheduleRepository.saveBlockedTimes(
+        blockedTimesDomain,
+        queryRunner,
+      );
+      await queryRunner.commitTransaction();
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       Logger.error(
         `Failed to update blocked times for user ${userId}: ${error}`,
       );
       throw new InternalServerErrorException('Failed to update blocked times');
+    } finally {
+      await queryRunner.release();
     }
   }
 

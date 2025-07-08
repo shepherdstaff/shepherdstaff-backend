@@ -12,7 +12,9 @@ import { BlockedTimeEntity } from '../entities/blocked-time.entity';
  * Service class responsible for handling operations related to saving scheduled events.
  */
 @Injectable()
-export class ScheduleRepository extends TransactionalRepository<EventEntity> {
+export class ScheduleRepository extends TransactionalRepository<
+  EventEntity | BlockedTimeEntity
+> {
   /**
    * Creates an instance of ScheduleRepository.
    * @param eventsRepository - The repository used to interact with the `EventEntity` in the database.
@@ -90,12 +92,33 @@ export class ScheduleRepository extends TransactionalRepository<EventEntity> {
     });
   }
 
-  public async saveBlockedTimes(blockedTimes: BlockedTime[]): Promise<void> {
+  public async saveBlockedTimes(
+    blockedTimes: BlockedTime[],
+    queryRunner?: QueryRunner,
+  ): Promise<void> {
+    const repository = this.useRepository(
+      this.blockedTimeRepository,
+      queryRunner,
+    );
+
     const blockedTimeEntities = blockedTimes.map((blockedTime) =>
       BlockedTimeEntity.from(blockedTime),
     );
 
-    await this.blockedTimeRepository.save(blockedTimeEntities);
+    await repository.save(blockedTimeEntities);
+  }
+
+  public async clearBlockedTimesForUser(
+    userId: string,
+    queryRunner?: QueryRunner,
+  ): Promise<void> {
+    const repository = this.useRepository(
+      this.blockedTimeRepository,
+      queryRunner,
+    );
+
+    // Delete all blocked times for the user
+    await repository.delete({ user: { id: userId } });
   }
 
   public async getBlockedTimesForUser(userId: string): Promise<BlockedTime[]> {
