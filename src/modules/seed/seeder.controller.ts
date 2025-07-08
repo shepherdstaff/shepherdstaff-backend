@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
 import { Public } from 'src/decorators/public.decorator';
 import { UserService } from '../users/services/user.service';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('seeder')
 export class SeederController {
@@ -13,6 +14,11 @@ export class SeederController {
 
   @Get()
   @Public()
+  @ApiOperation({
+    summary: '[TEST] Seed test data for development and testing',
+    description:
+      'This endpoint seeds test data for development and testing purposes. It should only be run in development or testing environments.',
+  })
   async seedTestData() {
     // Check if env is not test or dev, if so then block seeder from running
     const currentEnv = this.configService.get<string>('NODE_ENV');
