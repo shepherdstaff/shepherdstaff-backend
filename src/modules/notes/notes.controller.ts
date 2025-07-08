@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
 import { NoteDto } from './dto/note.dto';
@@ -30,27 +39,32 @@ export class NotesController {
     );
   }
 
-  // @Patch(':mentorId/mentees/:menteeId/notes/:noteId')
-  // async editNote(
-  //   @Param('mentorId') mentorId: string,
-  //   @Param('menteeId') menteeId: string,
-  //   @Param('noteId') noteId: string,
-  //   @Body() prayer: Prayer,
-  // ) {
-  //   return this.noteService.editNote(
-  //     mentorId,
-  //     menteeId,
-  //     noteId,
-  //     prayer.content,
-  //   );
-  // }
+  @Patch('/:menteeId')
+  async editNote(
+    @Req() req: Request,
+    @Param('menteeId') menteeId: string,
+    @Body() noteDto: NoteDto,
+  ) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return await this.notesService.updateNote(
+      userPayload.userId,
+      menteeId,
+      noteDto.id,
+      noteDto.content,
+    );
+  }
 
-  // @Delete(':mentorId/mentees/:menteeId/notes/:noteId')
-  // async deleteNote(
-  //   @Param('mentorId') mentorId: string,
-  //   @Param('menteeId') menteeId: string,
-  //   @Param('noteId') noteId: string,
-  // ) {
-  //   return this.noteService.deleteNote(mentorId, menteeId, noteId);
-  // }
+  @Delete('/:menteeId/:noteId')
+  async deleteNote(
+    @Req() req: Request,
+    @Param('menteeId') menteeId: string,
+    @Param('noteId') noteId: string,
+  ) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return await this.notesService.deleteNote(
+      userPayload.userId,
+      menteeId,
+      noteId,
+    );
+  }
 }

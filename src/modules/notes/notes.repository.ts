@@ -31,4 +31,23 @@ export class NotesRepository {
     });
     return notes.map((noteEntity) => noteEntity.toDomain());
   }
+
+  async updateNote(noteId: string, newContent: string): Promise<void> {
+    await this.notesRepository.update(noteId, {
+      content: newContent,
+      updatedAt: new Date(),
+    });
+  }
+
+  async findNoteById(noteId: string): Promise<NoteEntity> {
+    const noteEntity = await this.notesRepository.findOne({
+      where: { id: noteId },
+      relations: ['fromUser', 'toUser'],
+    });
+    return noteEntity;
+  }
+
+  async deleteNote(noteId: string): Promise<void> {
+    await this.notesRepository.delete(noteId);
+  }
 }

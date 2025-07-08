@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, plainToInstance } from 'class-transformer';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Note } from '../domain/note.domain';
 import { DateTime } from 'luxon';
 
 export class NoteDto {
   @Expose()
   @ApiProperty({ description: 'Unique identifier of the note' })
-  id: string;
+  @IsOptional()
+  id?: string;
 
   @Expose()
   @ApiProperty({ description: 'Content of the note' })
@@ -16,10 +17,12 @@ export class NoteDto {
 
   @Expose()
   @ApiProperty({ description: 'Creation date of the note' })
+  @IsOptional()
   createdAt?: Date;
 
   @Expose()
   @ApiProperty({ description: 'Last updated date of the note' })
+  @IsOptional()
   updatedAt?: Date;
 
   toDomain(): Note {
