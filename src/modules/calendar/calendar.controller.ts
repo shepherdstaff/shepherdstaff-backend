@@ -28,6 +28,11 @@ export class CalendarController {
 
   // TODO: for testing purposes, to be removed in production
   @Get('test-sync')
+  @ApiOperation({
+    summary: '[TEST] Test endpoint to sync calendar events for a user',
+    description:
+      'This endpoint is used to test the calendar synchronization functionality. It retrieves the latest calendar events for a user and returns them.',
+  })
   async testSyncCalendar(@Query('userId') userId: string) {
     return this.calendarSyncService.retrieveLatestCalendarEvents(
       userId,
