@@ -1,16 +1,12 @@
 // controllers/mentee.controller.ts
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { NoteService } from 'src/modules/notes/notes.service';
 import { CreateMenteeDto } from '../dto/mentee.dto';
 import { UserService } from '../services/user.service';
 import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('mentee')
 export class MenteeController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly noteService: NoteService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('/:mentorId')
   @ApiOperation({

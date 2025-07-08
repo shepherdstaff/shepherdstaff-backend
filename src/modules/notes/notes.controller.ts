@@ -1,26 +1,34 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { NotesService } from './notes.service';
+import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
+import { NoteDto } from './dto/note.dto';
+import { Request } from 'express';
 
-@Controller()
+@Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
-  // @Get(':mentorId/mentees/:menteeId/notes')
-  // async getNotes(
-  //   @Param('mentorId') mentorId: string,
-  //   @Param('menteeId') menteeId: string,
-  // ) {
-  //   return this.noteService.getNotes(mentorId, menteeId);
-  // }
+  @Get('/:menteeId')
+  async getNotes(@Req() req: Request, @Param('menteeId') menteeId: string) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    return (await this.notesService.getNotes(userPayload.userId, menteeId)).map(
+      (note) => NoteDto.from(note),
+    );
+  }
 
-  // @Post(':mentorId/mentees/:menteeId/notes')
-  // async createNote(
-  //   @Param('mentorId') mentorId: string,
-  //   @Param('menteeId') menteeId: string,
-  //   @Body() prayer: Prayer,
-  // ) {
-  //   return this.noteService.createNote(mentorId, menteeId, prayer.content);
-  // }
+  @Post('/:menteeId')
+  async createNote(
+    @Req() req: Request,
+    @Param('menteeId') menteeId: string,
+    @Body() noteDto: NoteDto,
+  ) {
+    const userPayload = retrieveUserInfoFromRequest(req);
+    await this.notesService.createNote(
+      userPayload.userId,
+      menteeId,
+      noteDto.content,
+    );
+  }
 
   // @Patch(':mentorId/mentees/:menteeId/notes/:noteId')
   // async editNote(

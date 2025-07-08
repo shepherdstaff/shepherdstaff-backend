@@ -10,6 +10,7 @@ import { SeederModule } from './modules/seed/seeder.module';
 import { UserModule } from './modules/users/user.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { DateScraperModule } from './modules/date-scraper/date-scraper.module';
+import { NotesModule } from './modules/notes/notes.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { DateScraperModule } from './modules/date-scraper/date-scraper.module';
     MeetingRecommendationModule,
     NotificationModule,
     DateScraperModule,
+    NotesModule,
   ],
   controllers: [],
   providers: [],

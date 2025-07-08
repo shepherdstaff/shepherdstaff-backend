@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { Note } from './domain/note.domain';
+import { NotesRepository } from './notes.repository';
 
 @Injectable()
 export class NotesService {
-  // async getNotes(mentorId: string, menteeId: string): Promise<Prayer[]> {
-  //   if (prayerDb[mentorId] && prayerDb[mentorId][menteeId])
-  //     return prayerDb[mentorId][menteeId];
-  //   else {
-  //     return;
-  //   }
-  // }
-  // async createNote(mentorId: string, menteeId: string, content: string) {
-  //   if (prayerDb[mentorId] && prayerDb[mentorId][menteeId]) {
-  //     prayerDb[mentorId][menteeId].push(new Prayer(content, new Date()));
-  //     return prayerDb[mentorId][menteeId];
-  //   }
-  //   return;
-  // }
+  constructor(private readonly notesRepository: NotesRepository) {}
+
+  async getNotes(mentorId: string, menteeId: string): Promise<Note[]> {
+    return await this.notesRepository.getNotes(mentorId, menteeId);
+  }
+
+  async createNote(mentorId: string, menteeId: string, content: string) {
+    const note = plainToInstance(Note, {
+      content: content,
+      createdAt: null, // Will be set by the repository
+      updatedAt: null, // Will be set by the repository
+    });
+
+    return await this.notesRepository.createNote(mentorId, menteeId, note);
+  }
   // async editNote(
   //   mentorId: string,
   //   menteeId: string,
