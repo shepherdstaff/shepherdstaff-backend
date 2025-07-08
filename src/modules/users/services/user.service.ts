@@ -45,10 +45,11 @@ export class UserService {
     name: string,
     birthdate: Date,
     email: string,
+    phoneNumber: string,
     userName: string,
     pass: string,
   ) {
-    const newUser = new User({ name, birthdate, email });
+    const newUser = new User({ name, birthdate, email, phoneNumber });
 
     return await this.usersRepository.createUser(newUser, userName, pass);
   }
@@ -57,13 +58,21 @@ export class UserService {
     name: string,
     birthdate: Date,
     email: string,
+    phoneNumber: string,
     userName: string,
     pass: string,
   ) {
     // TODO: seed default preferences for mentor
 
     return (
-      await this.createNewUser(name, birthdate, email, userName, pass)
+      await this.createNewUser(
+        name,
+        birthdate,
+        email,
+        phoneNumber,
+        userName,
+        pass,
+      )
     ).toMentor();
   }
 

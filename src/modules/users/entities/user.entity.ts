@@ -24,6 +24,9 @@ export class UserEntity {
   @Column()
   birthdate: Date;
 
+  @Column({ nullable: true })
+  phoneNumber: string;
+
   @OneToMany(
     () => UserRelationEntity,
     (userRelationEntity) => userRelationEntity.fromUser,

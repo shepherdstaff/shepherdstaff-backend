@@ -9,4 +9,7 @@ export class BaseUserDto {
 
   @ApiProperty()
   birthdate: string;
+
+  @ApiProperty()
+  phoneNumber: string;
 }
