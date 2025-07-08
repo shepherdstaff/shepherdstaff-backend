@@ -30,6 +30,21 @@ export class ScheduleService {
       blockedTimesMap[blockedTime.day].push(blockedTime);
     }
 
+    // Corner case: we want to consider free slots that are before the first busy timeslot
+    // and after the last busy timeslot, so we add them to the events
+    // Assume 1 week lead time for the earliest free slot
+    // TODO: fetch user preferences (how far ahead to recommend meetings) to determine latest free slot end
+    const earliestFreeSlotStart = DateTime.now().plus({ weeks: 1 });
+    const latestFreeSlotEnd = DateTime.now().plus({ months: 1 });
+    events.push({
+      startDateTime: earliestFreeSlotStart,
+      endDateTime: earliestFreeSlotStart,
+    });
+    events.push({
+      startDateTime: latestFreeSlotEnd,
+      endDateTime: latestFreeSlotEnd,
+    });
+
     // Sort events by their start times
     events.sort(
       (a, b) =>
