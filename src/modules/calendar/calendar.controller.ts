@@ -96,6 +96,8 @@ export class CalendarController {
   @Get('blocked-times')
   @ApiOperation({
     summary: 'Get the blocked times for a user',
+    description: `Blocked times are times when the user is not available for meetings. This is used to avoid scheduling meetings during these times. 
+      Note that the startTime and endTime will be provided as a full ISO 8601 string, e.g. "2023-10-01T10:00:00Z", but we only use the time portion (i.e. "10:00:00Z or 10:00").`,
   })
   async getBlockedTimes(@Req() req: Request) {
     const userPayload = retrieveUserInfoFromRequest(req);

@@ -20,7 +20,7 @@ export class BlockedTimeDto {
   @Expose()
   @ApiProperty({
     type: String,
-    description: 'Start time in ISO 8601 format',
+    description: 'End time in ISO 8601 format',
   })
   @IsString()
   @IsNotEmpty()
