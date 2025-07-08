@@ -6,6 +6,7 @@ import { UserService } from '../users/services/user.service';
 import { MeetingRecommendation } from './domain/meeting-recommendation.domain';
 import { MeetingRecommendationRepository } from './meeting-recommendation.repository';
 import { NotificationService } from '../notification/notification.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class MeetingRecommendationService {
@@ -16,7 +17,7 @@ export class MeetingRecommendationService {
     private notificationService: NotificationService,
   ) {}
 
-  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async ensureMeetingsComplete() {
     // Find all meetings that have endDateTime in the past and status is PENDING
     // Mark them as COMPLETED
@@ -29,7 +30,7 @@ export class MeetingRecommendationService {
     );
   }
 
-  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkForMeetingsToRecommend() {
     // Find last completed meeting for each mentor-mentee pair
     // Check meeting frequency preference for mentor-mentee pair (for now hard code to monthly)
