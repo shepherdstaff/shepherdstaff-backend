@@ -10,26 +10,46 @@ import {
 } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { retrieveUserInfoFromRequest } from 'src/utils/helpers';
-import { NoteDto } from './dto/note.dto';
+import { NoteResponseDto } from './dto/response/note-response.dto';
 import { Request } from 'express';
+import { CreateNoteRequestDto } from './dto/request/create-note-request.dto';
+import { UpdateNoteRequestDto } from './dto/request/update-note-request.dto';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
   @Get('/:menteeId')
-  async getNotes(@Req() req: Request, @Param('menteeId') menteeId: string) {
+  @ApiOperation({
+    summary: 'Get all notes for a specific mentee',
+    description: 'Retrieves all notes associated with the specified mentee ID.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all notes for the specified mentee',
+    type: [NoteResponseDto],
+  })
+  async getNotes(
+    @Req() req: Request,
+    @Param('menteeId') menteeId: string,
+  ): Promise<NoteResponseDto[]> {
     const userPayload = retrieveUserInfoFromRequest(req);
     return (await this.notesService.getNotes(userPayload.userId, menteeId)).map(
-      (note) => NoteDto.from(note),
+      (note) => NoteResponseDto.from(note),
     );
   }
 
   @Post('/:menteeId')
+  @ApiOperation({
+    summary: 'Create a new note for a mentee',
+    description:
+      'Creates a new note for the specified mentee with the given content.',
+  })
   async createNote(
     @Req() req: Request,
     @Param('menteeId') menteeId: string,
-    @Body() noteDto: NoteDto,
+    @Body() noteDto: CreateNoteRequestDto,
   ) {
     const userPayload = retrieveUserInfoFromRequest(req);
     await this.notesService.createNote(
@@ -40,10 +60,15 @@ export class NotesController {
   }
 
   @Patch('/:menteeId')
+  @ApiOperation({
+    summary: 'Edit an existing note for a mentee',
+    description:
+      'Updates the content of an existing note for the specified mentee.',
+  })
   async editNote(
     @Req() req: Request,
     @Param('menteeId') menteeId: string,
-    @Body() noteDto: NoteDto,
+    @Body() noteDto: UpdateNoteRequestDto,
   ) {
     const userPayload = retrieveUserInfoFromRequest(req);
     return await this.notesService.updateNote(
@@ -55,6 +80,10 @@ export class NotesController {
   }
 
   @Delete('/:menteeId/:noteId')
+  @ApiOperation({
+    summary: 'Delete a note for a mentee',
+    description: 'Deletes the specified note for the given mentee.',
+  })
   async deleteNote(
     @Req() req: Request,
     @Param('menteeId') menteeId: string,

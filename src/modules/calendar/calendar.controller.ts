@@ -36,13 +36,24 @@ export class CalendarController {
   }
 
   @Get('start-google-oauth')
+  @ApiOperation({
+    summary: 'Initiate Google OAuth flow for calendar synchronization',
+    description:
+      'This endpoint starts the Google OAuth flow to allow the user to connect their Google Calendar account. Generates a link that the user should be redirected to on the frontend to authorize Google Calendar permissions.',
+  })
   async startGoogleOAuth(@Req() req: Request) {
     const userPayload = retrieveUserInfoFromRequest(req);
     return this.calendarSyncService.initiateGoogleOAuth(userPayload);
   }
+
   @Public()
   @Get('google-oauth-callback')
   @Redirect()
+  @ApiOperation({
+    summary: 'Callback endpoint for Google OAuth',
+    description:
+      'This endpoint is called by Google OAuth after the user has authorized the application. It processes the authorization code and state returned by Google, and redirects the user to the frontend dashboard.',
+  })
   async googleOAuthCallback(
     @Query('code') code: string,
     @Query('state') state: string,
@@ -72,6 +83,11 @@ export class CalendarController {
   }
 
   @Get('calendar-options')
+  @ApiOperation({
+    summary: 'Get calendar options for a user',
+    description:
+      'This endpoint retrieves the calendar options for a user, i.e. which calendars are omitted from meeting recommendation consideration.',
+  })
   async getCalendarOptions(@Req() req: Request) {
     const userPayload = retrieveUserInfoFromRequest(req);
     return this.calendarSyncService.getCalendarOptions(userPayload.userId);
