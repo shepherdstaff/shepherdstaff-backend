@@ -15,11 +15,14 @@ export class NotesRepository {
     mentorId: string,
     menteeId: string,
     note: Note,
-  ): Promise<void> {
+  ): Promise<Partial<Note>> {
     const noteEntity = NoteEntity.fromNote(note, mentorId, menteeId);
     noteEntity.createdAt = new Date();
     noteEntity.updatedAt = new Date();
-    await this.notesRepository.save(noteEntity);
+    const response = await this.notesRepository.save(noteEntity);
+    return {
+      id: response.id,
+    };
   }
 
   async getNotes(mentorId: string, menteeId: string): Promise<Note[]> {

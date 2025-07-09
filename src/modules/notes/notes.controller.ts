@@ -52,7 +52,7 @@ export class NotesController {
     @Body() noteDto: CreateNoteRequestDto,
   ) {
     const userPayload = retrieveUserInfoFromRequest(req);
-    await this.notesService.createNote(
+    return await this.notesService.createNote(
       userPayload.userId,
       menteeId,
       noteDto.content,
