@@ -73,6 +73,7 @@ export class UserEntity {
       email: this.email,
       birthdate: this.birthdate,
       createdAt: this.createdAt,
+      phoneNumber: this.phoneNumber,
     });
   }
 }
