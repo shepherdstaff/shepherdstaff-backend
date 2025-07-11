@@ -205,7 +205,9 @@ export class CalendarSyncService {
       Logger.error(
         `User ${userId} does not have a calendar token saved, calendar sync not initiated yet.`,
       );
-      return;
+      throw new InternalServerErrorException(
+        'User does not have a calendar token saved, calendar sync not initiated yet.',
+      );
     }
 
     const latestToken = await this.refreshAccessToken(calendarToken);
