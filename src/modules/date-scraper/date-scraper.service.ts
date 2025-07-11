@@ -9,6 +9,7 @@ import { AiService } from 'src/modules/ai/ai.service';
 import { DateScraperRepository } from './date-scraper.repository';
 import { ImportantDate } from './domain/important-date.domain';
 import { DateTime } from 'luxon';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 const oLevelPdfUrl =
   'https://file.go.gov.sg/2025-gce-o-level-exam-timetable.pdf';
@@ -49,6 +50,7 @@ export class DateScraperService {
     ];
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_7PM)
   async processDatesFromPdf(): Promise<any> {
     try {
       for (const { pdfDest, pdfUrl, prefix } of pdfs) {
