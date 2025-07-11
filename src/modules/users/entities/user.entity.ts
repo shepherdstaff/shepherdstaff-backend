@@ -52,6 +52,7 @@ export class UserEntity {
     userEntity.email = user.email;
     userEntity.birthdate = user.birthdate;
     userEntity.isLimited = isLimited;
+    userEntity.phoneNumber = user.phoneNumber;
 
     return userEntity;
   }

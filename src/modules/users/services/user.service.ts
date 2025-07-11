@@ -20,8 +20,9 @@ export class UserService {
     name: string,
     birthdate: Date,
     email: string,
+    phoneNumber?: string,
   ) {
-    const newMentee = new Mentee({ name, birthdate, email });
+    const newMentee = new Mentee({ name, birthdate, email, phoneNumber });
 
     const createdMenteeEntity =
       await this.usersRepository.createUser(newMentee);

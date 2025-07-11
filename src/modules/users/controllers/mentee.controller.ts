@@ -22,6 +22,7 @@ export class MenteeController {
       menteeData.name,
       new Date(menteeData.birthdate),
       menteeData.email,
+      menteeData.phoneNumber,
     );
   }
 
