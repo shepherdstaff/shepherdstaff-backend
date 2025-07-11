@@ -95,8 +95,19 @@ export class CalendarSyncService {
     await this.fetchAndSaveGoogleCalendarEvents(userId, limit);
   }
 
-  async getCalendarOptions(userId: string) {
-    await this.setGoogleOauth2ClientCredentials(userId);
+  async getCalendarOptions(
+    userId: string,
+  ): Promise<GetCalendarOptionsResponseDto> {
+    try {
+      await this.setGoogleOauth2ClientCredentials(userId);
+    } catch (error) {
+      Logger.error(
+        `Failed to set Google OAuth2 client credentials for user ${userId}: ${error}`,
+      );
+      return plainToInstance(GetCalendarOptionsResponseDto, {
+        calendars: [],
+      });
+    }
 
     const googleCalendar = google.calendar({
       version: 'v3',
