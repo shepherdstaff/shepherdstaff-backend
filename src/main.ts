@@ -36,8 +36,10 @@ async function bootstrap() {
     }
 
     const config = new DocumentBuilder()
-      .setTitle('Fellowship App Backend')
-      .setDescription('Backend API for #HACK2024 Fellowship App')
+      .setTitle('ShepherdStaff Backend')
+      .setDescription(
+        'Backend API for ShepherdStaff - #HACK2024 Fellowship App',
+      )
       .setVersion('1.0')
       .addBearerAuth({
         type: 'http',
