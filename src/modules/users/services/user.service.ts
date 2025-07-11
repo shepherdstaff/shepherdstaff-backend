@@ -1,5 +1,5 @@
 // services/mentee.service.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PreferenceService } from 'src/modules/preferences/preference.service';
 import { Mentee } from '../domain/mentee';
 import { UsersRepository } from '../repositories/users.repository';
@@ -43,9 +43,25 @@ export class UserService {
     userName: string,
     pass: string,
   ) {
+    const parsedUserName = userName.trim().toLowerCase();
+
+    // Validate that userName and email are unique
+    const existingUserAuth =
+      await this.usersRepository.findUserAuthByUserName(parsedUserName);
+    if (existingUserAuth) {
+      throw new BadRequestException('Username already taken');
+    }
+
+    const existingUser = await this.usersRepository.findUserByEmail(email);
+    if (existingUser) {
+      throw new BadRequestException(
+        'Email already used in a different account',
+      );
+    }
+
     const newUser = new User({ name, birthdate, email, phoneNumber });
 
-    return await this.usersRepository.createUser(newUser, userName, pass);
+    return await this.usersRepository.createUser(newUser, parsedUserName, pass);
   }
 
   async createNewMentor(

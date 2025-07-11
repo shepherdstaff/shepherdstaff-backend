@@ -51,6 +51,12 @@ export class UsersRepository {
     return this.userRepository.findOneBy({ id });
   }
 
+  async findUserByEmail(email: string): Promise<UserEntity> {
+    return this.userRepository.findOne({
+      where: { email },
+    });
+  }
+
   async findUserAuthByUserName(userName: string): Promise<UserAuthEntity> {
     const userAuthEntity = await this.userAuthRepository.findOne({
       where: { userName },
