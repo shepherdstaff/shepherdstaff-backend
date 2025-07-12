@@ -51,3 +51,11 @@ http://localhost:3000/api-docs
 Note that when you are using the Swagger docs, you will first need to login to get a JWT token to continue using the rest of the endpoints. Scroll down to the `Auth` endpoints, and open the `POST /api/auth/login` endpoint to login. Then copy and paste the returned access token in the `Authorize` button at the top right of the Swagger docs.
 
 If you do not have an account yet, use the `POST /api/mentor` endpoint to sign up (as a mentor)
+
+## DB
+
+If you want to spin up the postgres database, go to the root of the folder and run `docker-compose up -d`. Assuming that you have docker desktop already installed
+
+## Hosting 
+
+The backend is hosted on railway, all process.env variables are passed in from there. Please ask Tammy or Triston to add you to the railway. 
