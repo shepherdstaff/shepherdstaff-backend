@@ -36,13 +36,22 @@ export class AuthService {
 
   async signIn(username: string, pass: string): Promise<any> {
     const userAuth = await this.userService.getUserAuthByUsername(username);
+    if (!userAuth) {
+      return {
+        access_token: null,
+        refresh_token: null,
+      };
+    }
     const isPasswordMatch = await compareInputPasswordWithHash(
       pass,
       userAuth.hash,
     );
 
     if (!isPasswordMatch) {
-      throw new UnauthorizedException();
+      return {
+        access_token: null,
+        refresh_token: null,
+      };
     }
 
     const { user, id: userAuthId } = userAuth;
