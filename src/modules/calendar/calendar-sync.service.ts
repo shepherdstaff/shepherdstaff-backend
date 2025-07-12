@@ -99,7 +99,7 @@ export class CalendarSyncService {
     userId: string,
   ): Promise<GetCalendarOptionsResponseDto> {
     try {
-      await this.setGoogleOauth2ClientCredentials(userId);
+      await this.calendarTokenRepository.findTokenByUserId(userId);
     } catch (error) {
       Logger.error(
         `Failed to set Google OAuth2 client credentials for user ${userId}: ${error}`,
