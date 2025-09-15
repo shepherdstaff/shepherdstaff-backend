@@ -62,10 +62,19 @@ export class CalendarController {
   async googleOAuthCallback(
     @Query('code') code: string,
     @Query('state') state: string,
+    @Query('redirect_uri') redirectUri?: string,
   ) {
     await this.calendarSyncService.googleOAuthCallback(code, state);
+
+    const url =
+      redirectUri && redirectUri.startsWith('http')
+        ? redirectUri
+        : redirectUri && /^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(redirectUri)
+          ? redirectUri // allow custom schemes like myapp://callback
+          : `${process.env.FRONTEND_URL}/dashboard`;
+
     return {
-      url: `${process.env.FRONTEND_URL}/dashboard`,
+      url,
       statusCode: 302,
     };
   }
